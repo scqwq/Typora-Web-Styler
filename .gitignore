@@ -14,3 +14,25 @@
 .env
 .env.*
 !.env.example
+
+# 本地测试与分析产物
+/playwright-report/
+/test-results/
+/blob-report/
+/.nyc_output/
+/.npm/
+*.tsbuildinfo
+
+# Typora Web Styler 本地分发包（保留旧名称规则）
+/typora-web-styler-*.zip
+
+# 编辑器临时文件与系统缓存
+/.idea/
+*.swp
+*.swo
+*~
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+Desktop.ini

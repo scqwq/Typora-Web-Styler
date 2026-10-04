@@ -1,4 +1,4 @@
-# Web-markdown
+# Typora Web Styler
 
 中文使用说明和快速开始现统一维护在 [README.md](README.md)。
 
