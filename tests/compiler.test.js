@@ -30,7 +30,7 @@ test('sibling escape, editor UI, pseudo elements and unsafe nesting are omitted'
   assert.ok(!css.includes('footer'));
   assert.ok(!css.includes('CodeMirror'));
   assert.ok(!css.includes('::before'));
-  assert.ok(report.skipped.length >= 5);
+  assert.ok(report.skipped.length >= 4);
 });
 test('resources hidden in variables, font definitions, imports and animations never pass through', () => {
   const { css, report } = compileTheme(`@import 'https://example.org/theme.css';
@@ -45,7 +45,7 @@ test('resources hidden in variables, font definitions, imports and animations ne
   assert.ok(!css.includes('animation'));
   assert.ok(!css.includes('position'));
   assert.ok(css.includes('--wm-preview-safe'));
-  assert.equal(report.resources.length, 2);
+  assert.equal(report.resources.length, 3);
 });
 test('rem conversion uses a static theme html base without changing page html', () => {
   const { css, report } = compileTheme('html { font-size: 20px; } #write h2 { font-size: 1.5rem; margin: calc(2rem + 1px); }');
@@ -55,7 +55,7 @@ test('rem conversion uses a static theme html base without changing page html', 
   assert.ok(!css.includes('1.5rem'));
 });
 test('malformed, oversized and empty themes fail without yielding a partial stylesheet', () => {
-  for (const source of ['p {', '/* comment */', 'a'.repeat(512 * 1024 + 1)]) assert.throws(() => compileTheme(source));
+  for (const source of ['p {', '/* comment */', 'a'.repeat(1024 * 1024 + 1)]) assert.throws(() => compileTheme(source));
   assert.throws(() => compileTheme('p { color: red }', { sessionId: 'x"] body' }));
 });
 test('numeric-leading session IDs remain quoted CSS attribute values', () => {

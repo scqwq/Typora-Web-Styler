@@ -27,8 +27,8 @@ $('locate').addEventListener('click', () => action(async () => {
 $('apply').addEventListener('click', () => action(async () => {
   const result = await send('article.apply', { tabId, documentToken, selector: confirmedSelector, themeId: $('theme').value });
   await chrome.storage.local.set({ preferredTheme: $('theme').value });
-  $('reportBox').hidden = false; $('report').textContent = reportText(result.report);
-  status(`主题已应用。已保护 ${result.protectedCount} 个交互、公式或代码区域。`);
+  $('reportBox').hidden = false; $('report').textContent = `${reportText(result.report)}\n已加载 ${result.resources.fontLoaded} 个字体；保留 ${result.preservedCount} 项原站样式。\n${result.resources.failures.join('\n')}`;
+  status(`主题已应用。已保护 ${result.protectedCount} 个控件、公式或图表区域。${result.resources.failures.length ? '部分资源未加载，详见报告和日志。' : ''}`);
 }));
 $('restore').addEventListener('click', () => action(async () => {
   await send('article.restore', { tabId }); $('reportBox').hidden = true; status('已撤销主题，保留网页当前内容。');

@@ -1,4 +1,5 @@
 import parser from 'postcss-selector-parser';
+import { mapCodeClass } from './compatibility/code.js';
 
 const editorNames = new Set(['typora-sidebar', 'typora-source', 'typora-quick-open', 'md-meta', 'md-before', 'md-after', 'md-toc', 'CodeMirror', 'md-fences', 'cm-s-inner']);
 const allowedFunctional = new Set([':is', ':where', ':not']);
@@ -17,6 +18,7 @@ export function convertSelectors(input, sessionId, onSkip) {
     const selector = original.clone();
     let unsupported = '';
     selector.walk(node => {
+      if (mapCodeClass(node)) return;
       if (node.type === 'nesting' || node.namespace != null) unsupported = '嵌套或命名空间选择器';
       if (node.type === 'pseudo' && (node.value.startsWith('::') || [':before', ':after', ':first-line', ':first-letter', ':visited', ':has'].includes(node.value))) unsupported = '伪元素或暂未支持的伪类';
       if (node.type === 'pseudo' && node.nodes?.length && !allowedFunctional.has(node.value)) unsupported = '暂未支持的函数伪类';

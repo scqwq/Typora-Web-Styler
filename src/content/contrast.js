@@ -25,7 +25,7 @@ function ratio(element) {
   return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
 }
 export function captureReadability(root) {
-  return [...root.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,blockquote,td')]
+  return [...root.querySelectorAll('h1,h2,h3,h4,h5,h6,p,li,blockquote,td,pre,code,pre code span')]
     .filter(el => el.textContent.trim() && !el.closest('[data-wm-protected],svg,.katex,mjx-container'))
     .slice(0, 40).map(el => ({ el, before: ratio(el) }));
 }

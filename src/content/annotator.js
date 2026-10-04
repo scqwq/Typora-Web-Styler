@@ -1,4 +1,4 @@
-const PROTECTED = 'button, input, textarea, select, form, video, audio, iframe, svg, canvas, nav, aside, footer, [role="button"], .katex, mjx-container, .MathJax, .mermaid, pre code span';
+const PROTECTED = 'button, input, textarea, select, form, video, audio, iframe, svg, canvas, nav, aside, footer, [role="button"], .katex, mjx-container, .MathJax, .mermaid';
 const inherited = ['font-family', 'font-size', 'font-weight', 'font-style', 'line-height', 'color', 'letter-spacing', 'word-spacing', 'text-align', 'text-transform', 'white-space'];
 
 export function annotate(root, sessionId) {
@@ -34,5 +34,10 @@ export function undo(modifications) {
   for (const { el, name, before, value } of [...modifications].reverse()) {
     if (el.getAttribute(name) !== value) continue; // Never overwrite a subsequent site modification.
     if (before === null) el.removeAttribute(name); else el.setAttribute(name, before);
+  }
+}
+export function redo(modifications) {
+  for (const { el, name, before, value } of modifications) {
+    if (el.getAttribute(name) === before) el.setAttribute(name, value);
   }
 }

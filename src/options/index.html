@@ -1,7 +1,10 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web-markdown · 主题管理</title><link rel="stylesheet" href="index.css"></head>
-<body><main><header><span class="eyebrow">WEB-MARKDOWN / 0.1.0</span><h1>把喜欢的排版，带到网页里。</h1><p>导入 Typora CSS，自动转换为只作用于文章正文的主题。</p></header>
-<section><h2>导入主题</h2><form id="importForm"><label for="name">主题名称</label><input id="name" maxlength="100" placeholder="例如 我的 Typora 主题" required>
-<label for="file">选择 CSS 文件</label><input id="file" type="file" accept=".css,text/css" required><p class="hint">单文件，最多 512 KB。第一版使用系统字体，不加载外部字体、图片或 @import。</p><button id="import" type="submit">分析并导入</button></form><p id="status" role="status" aria-live="polite"></p></section>
+<body><main><header><span class="eyebrow">WEB-MARKDOWN / 0.2.0</span><h1>把喜欢的排版，带到网页里。</h1><p>导入 Typora CSS，自动转换为只作用于文章正文的主题。</p><nav><a href="#settings">统一样式配置</a> · <a href="../logs/index.html">日志</a></nav></header>
+<section><h2>导入主题</h2><form id="importForm"><label for="name">主题名称</label><input id="name" maxlength="100" placeholder="留空使用 CSS 文件名">
+<label for="file">选择 CSS 文件</label><input id="file" type="file" accept=".css,text/css" required><p class="hint">主 CSS 最多 1 MB（1,048,576 字节）。可补选本地字体、图片；不自动下载远程资源或加载 @import。</p>
+<label for="resources">配套资源文件（可选）</label><input id="resources" type="file" multiple accept=".woff,.woff2,.ttf,.otf,.png,.jpg,.jpeg,.webp,.gif">
+<label for="directory">或选择主题目录（保留资源路径）</label><input id="directory" type="file" webkitdirectory multiple><p class="hint">支持 WOFF/WOFF2/TTF/OTF 字体和 PNG/JPEG/WebP/GIF 图片。最多 64 个资源，单个最多 16 MB，合计最多 24 MB。目录中的其他 CSS 不会自动合并。背景图片默认关闭，可在下方开启。</p><button id="import" type="submit">分析并导入</button></form><p id="status" role="status" aria-live="polite"></p></section>
+<section id="settings"><h2>统一样式配置</h2><p>所有主题共用一套配置。保存后，在网页中再次点击“应用主题”生效；已打开的正文不会立即改变。</p><form id="settingsForm"><div id="policyFields"></div><button type="submit" id="saveSettings">保存配置</button> <button type="button" id="resetSettings">恢复默认配置</button></form><p id="settingsStatus" role="status" aria-live="polite"></p></section>
 <section><h2>我的主题</h2><div id="themes"></div></section>
-<section class="notes"><h2>第一版的边界</h2><p>应用主题时保留网站宽度与布局，并保护公式、图表、交互控件和现有代码配色。主题中的窗口布局、编辑器控件、动画和资源依赖会被跳过，并显示转换报告。</p><p>打开博客 → 点击扩展 → 识别正文并确认 → 应用主题。识别失败时，可输入正文容器的 CSS 选择器。点击“恢复原样”即可撤销扩展样式。</p></section>
+<section class="notes"><h2>使用与兼容性</h2><p>默认保留网站宽度、布局和代码配色，并保护公式、图表及交互控件。可通过统一配置逐项调整。编辑器界面、动画及 @import 会跳过；背景图片可能受到网页 CSP 限制，资源缺失或加载失败可在日志中查看。</p><p>打开博客 → 点击扩展 → 识别正文并确认 → 应用主题。识别失败时，可输入正文容器的 CSS 选择器。点击“恢复原样”即可撤销扩展样式。</p></section>
 </main><script type="module" src="index.js"></script></body></html>

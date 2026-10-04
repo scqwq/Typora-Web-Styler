@@ -1,5 +1,6 @@
 import { compileTheme } from '../theme/compiler.js';
-import { listThemes } from '../theme/repository.js';
+import { getTheme } from '../theme/repository.js';
+import { getSettings } from '../settings/repository.js';
 
 const locks = new Map();
 export function serialize(tabId, task) {
@@ -15,8 +16,8 @@ async function bootstrap(tabId) {
   return { tabId, documentIds: [result[0].documentId] };
 }
 async function command(target, payload) {
-  const result = await chrome.scripting.executeScript({ target, func: data => {
-    try { return { ok: true, value: globalThis.__wmV1.dispatch(data) }; }
+  const result = await chrome.scripting.executeScript({ target, func: async data => {
+    try { return { ok: true, value: await globalThis.__wmV1.dispatch(data) }; }
     catch (error) { return { ok: false, error: error.message }; }
   }, args: [payload] });
   if (!result[0]?.result?.ok) throw new Error(result[0]?.result?.error || '网页已变化或暂时无法访问。');
@@ -33,8 +34,8 @@ export async function operate(tabId, request) {
   const target = await bootstrap(tabId);
   let status = await command(target, { type: 'status' });
   // A terminated worker can leave an uncommitted insertion. The page records it before injection.
-  if (status.stagedCss) {
-    await chrome.scripting.removeCSS({ target, css: status.stagedCss, origin: 'AUTHOR' });
+  if (status.stagedCss || status.pending) {
+    if (status.stagedCss) await chrome.scripting.removeCSS({ target, css: status.stagedCss, origin: 'AUTHOR' });
     await command(target, { type: 'rollback' });
     status = await command(target, { type: 'status' });
   }
@@ -48,19 +49,16 @@ export async function operate(tabId, request) {
     }
     case 'article.apply': {
       if (!request.documentToken) throw new Error('请先识别并确认正文。');
-      const theme = (await listThemes()).find(item => item.id === request.themeId);
-      if (!theme) throw new Error('主题不存在，请重新选择。');
-      const sessionId = status.sessionId ?? crypto.randomUUID();
-      const compiled = compileTheme(theme.source, { sessionId });
-      const prepared = await command(target, { type: 'prepare', selector: request.selector ?? '', sessionId });
+      const theme = await getTheme(request.themeId);
+      const settings = await getSettings();
+      const sessionId = crypto.randomUUID();
+      const compiled = compileTheme(theme.source, { sessionId, settings, bundle: theme.bundle });
+      const prepared = await command(target, { type: 'prepare', selector: request.selector ?? '', sessionId, settings });
       const css = `${compiled.css}\n${prepared.protectionCss}`;
-      if (status.css === css) {
-        await command(target, { type: 'commit', sessionId, css, themeId: theme.id });
-        return { active: true, themeId: theme.id, report: compiled.report, protectedCount: prepared.protectedCount };
-      }
       let inserted = false;
+      let resources;
       try {
-        await command(target, { type: 'stage', sessionId, css });
+        resources = await command(target, { type: 'stage', sessionId, css, fonts: compiled.fonts, images: compiled.images });
         await chrome.scripting.insertCSS({ target, css, origin: 'AUTHOR' }); inserted = true;
         await command(target, { type: 'validate' });
         // Commit before deleting the old style so a failed insertion never destroys the existing theme.
@@ -71,7 +69,7 @@ export async function operate(tabId, request) {
       }
       const committed = await command(target, { type: 'status' });
       await cleanup(target, committed.retired);
-      return { active: true, themeId: theme.id, report: compiled.report, protectedCount: prepared.protectedCount };
+      return { active: true, themeId: theme.id, report: compiled.report, protectedCount: prepared.protectedCount, preservedCount: prepared.preservedCount, settings, resources };
     }
     default: throw new Error('未知页面操作。');
   }

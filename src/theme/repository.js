@@ -1,4 +1,6 @@
 import { compileTheme, MAX_THEME_BYTES } from './compiler.js';
+import { validateFiles, normalizePath } from './resources.js';
+import { putBundle, getBundle, deleteBundle } from './asset-store.js';
 
 export const DEMO_THEME = {
   id: 'builtin-paper', name: '纸笺 · 测试主题', builtIn: true,
@@ -21,18 +23,33 @@ export async function listThemes() {
   const { themes = [] } = await chrome.storage.local.get('themes');
   return [DEMO_THEME, ...themes];
 }
-export async function importTheme(name, source) {
+export async function getTheme(id) {
+  const theme = (await listThemes()).find(item => item.id === id);
+  if (!theme) throw new Error('主题不存在，请重新选择。');
+  if (theme.source) return { ...theme, bundle: {} }; // v0.1 themes remain readable.
+  const bundle = await getBundle(id);
+  if (!bundle) throw new Error('主题资源丢失，请重新导入。');
+  return { ...theme, source: bundle.source, bundle };
+}
+export async function importTheme(name, source, resources = {}) {
   if (typeof name !== 'string' || !name.trim()) throw new Error('请填写主题名称。');
-  if (typeof source !== 'string' || new TextEncoder().encode(source).length > MAX_THEME_BYTES) throw new Error('CSS 文件必须小于 512 KB。');
-  const compiled = compileTheme(source);
+  if (typeof source !== 'string' || new TextEncoder().encode(source).length > MAX_THEME_BYTES) throw new Error('CSS 文件最多 1 MB。');
+  const validated = validateFiles(resources.files ?? []);
+  const sourcePath = normalizePath(resources.sourcePath || 'theme.css');
+  if (!sourcePath) throw new Error('无效 CSS 文件路径。');
+  const bundle = { source, sourcePath, files: validated.files };
+  const compiled = compileTheme(source, { bundle, settings: { enableFonts: true, enableBackgroundImages: true, useThemeBackground: true } });
   const themes = (await listThemes()).filter(t => !t.builtIn);
   if (themes.length >= 20) throw new Error('首版最多保存 20 个自定义主题，请先删除不需要的主题。');
-  const theme = { id: crypto.randomUUID(), name: name.trim().slice(0, 100), source, report: compiled.report, createdAt: Date.now() };
-  await chrome.storage.local.set({ themes: [...themes, theme] });
+  const theme = { id: crypto.randomUUID(), name: name.trim().slice(0, 100), report: compiled.report, resourceCount: validated.files.length, resourceBytes: validated.bytes, createdAt: Date.now() };
+  await putBundle({ ...bundle, id: theme.id });
+  try { await chrome.storage.local.set({ themes: [...themes, theme] }); }
+  catch (error) { await deleteBundle(theme.id).catch(() => {}); throw error; }
   return theme;
 }
 export async function deleteTheme(id) {
   if (id === DEMO_THEME.id) throw new Error('内置测试主题不能删除。');
   const themes = (await listThemes()).filter(t => !t.builtIn && t.id !== id);
   await chrome.storage.local.set({ themes });
+  await deleteBundle(id);
 }

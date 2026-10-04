@@ -1,11 +1,14 @@
 import { locate, describe } from './detector.js';
-import { annotate, undo } from './annotator.js';
+import { annotate, undo, redo } from './annotator.js';
+import { preserve, undoPreservation, redoPreservation } from './preservation.js';
+import { loadResources, releaseFonts } from './resources.js';
 import { captureReadability, checkReadability } from './contrast.js';
 
 if (!globalThis.__wmV1) {
   let active = null;
   let pending = null;
   let stagedCss = null;
+  let stagedFaces = [];
   let selected = null;
   let selectedUrl = null;
   let retired = [];
@@ -20,8 +23,9 @@ if (!globalThis.__wmV1) {
     stopWatching();
     previewAnimation?.cancel(); previewAnimation = null;
     if (stagedCss) { retired.push(stagedCss); stagedCss = null; }
-    if (active) { undo(active.annotation.modifications); if (active.css) retired.push(active.css); active = null; }
-    if (pending) { undo(pending.annotation.modifications); pending = null; }
+    releaseFonts(stagedFaces); stagedFaces = [];
+    if (pending) { undoPreservation(pending.preservation); undo(pending.annotation.modifications); pending = null; }
+    if (active) { undoPreservation(active.preservation); undo(active.annotation.modifications); releaseFonts(active.faces); if (active.css) retired.push(active.css); active = null; }
   }
   function watch() {
     stopWatching();
@@ -41,10 +45,10 @@ if (!globalThis.__wmV1) {
     return root;
   }
   globalThis.__wmV1 = {
-    dispatch(command) {
+    async dispatch(command) {
       switch (command.type) {
         case 'status':
-          return { documentToken, active: !!active, themeId: active?.themeId, description: active ? describe(active.root) : null, notice, css: active?.css, sessionId: active?.id, retired: [...retired], stagedCss };
+          return { documentToken, active: !!active, pending: !!pending, themeId: active?.themeId, description: active ? describe(active.root) : null, notice, css: active?.css, sessionId: active?.id, retired: [...retired], stagedCss };
         case 'locate': {
           selected = locate(document, command.selector); selectedUrl = pageUrl(); notice = '';
           // A browser animation changes no DOM attributes and is cancelled automatically.
@@ -58,30 +62,47 @@ if (!globalThis.__wmV1) {
           previewAnimation?.cancel(); previewAnimation = null;
           if (active) {
             if (active.root !== root) throw new Error('切换正文区域前请先恢复当前主题。');
-            return { documentToken, id: active.id, protectionCss: active.annotation.css, protectedCount: active.annotation.protectedCount };
+            undoPreservation(active.preservation); undo(active.annotation.modifications);
           }
-          const readability = captureReadability(root);
-          const annotation = annotate(root, command.sessionId);
-          pending = { id: command.sessionId, root, url: pageUrl(), annotation, readability };
-          return { documentToken, id: pending.id, protectionCss: annotation.css, protectedCount: annotation.protectedCount };
+          let annotation;
+          try {
+            const readability = captureReadability(root);
+            annotation = annotate(root, command.sessionId);
+            const preservation = preserve(root, command.settings);
+            pending = { id: command.sessionId, root, url: pageUrl(), annotation, readability, preservation };
+            return { documentToken, id: pending.id, protectionCss: annotation.css, protectedCount: annotation.protectedCount, preservedCount: preservation.length };
+          } catch (error) {
+            if (annotation) undo(annotation.modifications);
+            if (active) { redo(active.annotation.modifications); redoPreservation(active.preservation); }
+            throw error;
+          }
         }
-        case 'stage':
-          if (!(pending ?? active) || (pending ?? active).id !== command.sessionId) throw new Error('没有准备好的主题会话。');
-          stagedCss = command.css; return {};
+        case 'stage': {
+          if (!pending || pending.id !== command.sessionId) throw new Error('没有准备好的主题会话。');
+          const next = pending;
+          stagedCss = command.css;
+          const loaded = await loadResources(command.fonts, command.images);
+          if (pending !== next || !next.root.isConnected || next.url !== pageUrl()) { releaseFonts(loaded.faces); throw new Error('资源加载期间页面已变化。'); }
+          stagedFaces = loaded.faces;
+          return { fontLoaded: loaded.faces.length, failures: loaded.failures };
+        }
         case 'validate':
           checkReadability((pending ?? active)?.readability ?? []); return {};
         case 'commit': {
           const next = pending ?? active;
           if (!next || next.id !== command.sessionId || !next.root.isConnected || next.url !== pageUrl()) {
-            if (pending) { undo(pending.annotation.modifications); pending = null; }
             throw new Error('页面已变化，应用已取消。');
           }
           if (active?.css && active.css !== command.css) retired.push(active.css);
-          active = { ...next, css: command.css, themeId: command.themeId };
+          releaseFonts(active?.faces);
+          active = { ...next, css: command.css, themeId: command.themeId, faces: stagedFaces };
+          stagedFaces = [];
           pending = null; stagedCss = null; watch(); return { active: true };
         }
         case 'rollback':
-          if (pending) { undo(pending.annotation.modifications); pending = null; }
+          if (pending) { undoPreservation(pending.preservation); undo(pending.annotation.modifications); pending = null; }
+          releaseFonts(stagedFaces); stagedFaces = [];
+          if (active) { redo(active.annotation.modifications); redoPreservation(active.preservation); }
           stagedCss = null;
           return {};
         case 'restore':
