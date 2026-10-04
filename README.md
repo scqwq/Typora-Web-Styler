@@ -9,7 +9,7 @@
 
 ## 环境与快速开始
 
-当前版本 **0.2.0**。构建需要 **Node.js 20+、npm**；优先支持 Windows 上的 Chrome / Edge，PowerShell 即可。
+当前版本 **0.2.0**。构建需要 **Node.js 20+、npm**；优先支持 Windows 上的 Chrome / Edge / 大部分浏览器，PowerShell 即可。
 
 ```powershell
 npm ci --cache .cache/npm
