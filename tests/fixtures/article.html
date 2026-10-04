@@ -1,0 +1,9 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>测试文章</title>
+<style>body{font:16px Arial;margin:30px;color:#222;background:#fff}nav{color:rgb(0, 90, 80)}article{max-width:760px;margin:auto}h2{color:rgb(20, 50, 70);font-size:24px}button{font:13px Arial;color:rgb(40, 60, 80)}.token{color:rgb(0, 110, 160)}.katex{color:rgb(80, 60, 30);font-size:20px}pre{background:#ddd;padding:8px}</style></head><body>
+<nav id="outside">网站导航 <a href="#heading">目录跳转</a></nav><article id="post"><h1>主题验证文章</h1><h2 id="heading">保持锚点</h2>
+<p>这是一段用于验证网页正文主题转换的内容。原有文章节点、链接、标题 ID 和交互均应保留。主题应该只改变正文区域，不影响导航与页脚。重复应用和恢复不应该重建网页。</p>
+<blockquote>引用内容用于测试主题背景与留白。</blockquote><table><tr><th>项目</th><th>结果</th></tr><tr><td>正文</td><td>保留</td></tr></table>
+<pre><code><span class="token">const</span> answer = 42;</code><button id="copy">复制代码</button></pre>
+<div class="katex"><span>x² + y²</span></div><svg width="60" height="30"><rect width="50" height="20" fill="#09a"/></svg>
+<a href="#heading" id="anchor">回到标题</a></article><footer id="footer">页脚保持原样</footer>
+<script>window.copies=0;document.querySelector('#copy').addEventListener('click',()=>window.copies++);window.originalHeading=document.querySelector('#heading');</script></body></html>

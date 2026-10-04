@@ -1,0 +1,24 @@
+{
+  "name": "web-markdown",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Apply scoped Typora themes to existing web articles",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.js",
+    "test:browser": "node scripts/browser-check.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "postcss": "8.5.28",
+    "postcss-selector-parser": "7.1.6",
+    "postcss-value-parser": "4.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "playwright": "1.63.0"
+  }
+}

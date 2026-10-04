@@ -1,0 +1,16 @@
+# 用户迁入的独立旧仓库，仅本地参考
+/markdown-viewer/
+
+# 新项目依赖与构建输出
+/node_modules/
+/dist/
+/coverage/
+/.cache/
+/artifacts/
+/web-markdown-*.zip
+*.log
+
+# 本地环境
+.env
+.env.*
+!.env.example

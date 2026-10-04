@@ -1,0 +1,7 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web-markdown · 主题管理</title><link rel="stylesheet" href="index.css"></head>
+<body><main><header><span class="eyebrow">WEB-MARKDOWN / 0.1.0</span><h1>把喜欢的排版，带到网页里。</h1><p>导入 Typora CSS，自动转换为只作用于文章正文的主题。</p></header>
+<section><h2>导入主题</h2><form id="importForm"><label for="name">主题名称</label><input id="name" maxlength="100" placeholder="例如 我的 Typora 主题" required>
+<label for="file">选择 CSS 文件</label><input id="file" type="file" accept=".css,text/css" required><p class="hint">单文件，最多 512 KB。第一版使用系统字体，不加载外部字体、图片或 @import。</p><button id="import" type="submit">分析并导入</button></form><p id="status" role="status" aria-live="polite"></p></section>
+<section><h2>我的主题</h2><div id="themes"></div></section>
+<section class="notes"><h2>第一版的边界</h2><p>应用主题时保留网站宽度与布局，并保护公式、图表、交互控件和现有代码配色。主题中的窗口布局、编辑器控件、动画和资源依赖会被跳过，并显示转换报告。</p><p>打开博客 → 点击扩展 → 识别正文并确认 → 应用主题。识别失败时，可输入正文容器的 CSS 选择器。点击“恢复原样”即可撤销扩展样式。</p></section>
+</main><script type="module" src="index.js"></script></body></html>
