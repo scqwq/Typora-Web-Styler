@@ -72,3 +72,10 @@ pre { padding: 12px; background: #f2f5ef; border-radius: 12px; font-size: 11px; 
 @media (max-width: 900px) { .hero { align-items: flex-start; flex-direction: column; gap: 18px; } #policyFields { grid-template-columns: 1fr 1fr; } .policy-group:last-child { grid-column: 1 / -1; } }
 @media (max-width: 680px) { main { padding: 24px 16px; } .workspace, #policyFields { grid-template-columns: 1fr; } section { padding: 21px; border-radius: 22px; } .policy-group:last-child { grid-column: auto; } .version { font-size: 11px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+/* Independent global background controls. */
+.background-preview{position:relative;isolation:isolate;overflow:hidden;min-height:210px;border-radius:18px;background:#e6ece8;margin-top:18px;display:grid;place-items:center;padding:24px}
+#backgroundPreviewImage{position:absolute;inset:0;background-size:cover;background-position:center;z-index:-1}
+#backgroundPreviewSurface{padding:22px;border-radius:14px;width:min(100%,460px);color:#24392d}
+#backgroundPreviewSurface p{color:inherit}
+#backgroundForm input[type=range]{width:100%;accent-color:#477f62;padding:0;cursor:pointer}
+#backgroundForm output{float:right;font-variant-numeric:tabular-nums}

@@ -1,6 +1,7 @@
 import { send, reportText } from '../shared/messages.js';
 import { DEFAULT_POLICY, POLICY_FIELDS } from '../shared/style-policy.js';
 import { MAX_CSS_BYTES, MAX_RESOURCE_BYTES, MAX_BUNDLE_BYTES, MAX_FILES } from '../theme/resources.js';
+import { DEFAULT_BACKGROUND } from '../shared/background-policy.js';
 const $ = id => document.getElementById(id);
 let busy = false;
 async function render() {
@@ -76,3 +77,56 @@ async function savePolicy(settings) {
 $('settingsForm').addEventListener('submit', event => { event.preventDefault(); savePolicy(Object.fromEntries(POLICY_FIELDS.map(([key]) => [key, $(key).checked]))); });
 $('resetSettings').addEventListener('click', () => savePolicy(DEFAULT_POLICY));
 try { await render(); showPolicy(await send('settings.get')); } catch (error) { $('status').textContent = error.message; $('status').className = 'error'; }
+
+let backgroundImage = null;
+let backgroundBusy = false;
+let backgroundSelection = 0;
+function previewBackground() {
+  const surface = Number($('surfaceOpacity').value), image = Number($('imageOpacity').value);
+  $('surfaceOpacityValue').value = `${surface}%`; $('imageOpacityValue').value = `${image}%`;
+  $('backgroundPreviewImage').style.backgroundImage = backgroundImage ? `url("${backgroundImage.dataUrl}")` : 'none';
+  $('backgroundPreviewImage').style.opacity = String(image / 100);
+  $('backgroundPreviewSurface').style.backgroundColor = `rgba(255,255,255,${surface / 100})`;
+  $('backgroundName').textContent = backgroundImage?.path ?? '尚未上传图片';
+}
+function showBackground(result) {
+  backgroundImage = result.image;
+  $('backgroundEnabled').checked = result.settings.enabled;
+  $('surfaceOpacity').value = result.settings.surfaceOpacity;
+  $('imageOpacity').value = result.settings.imageOpacity;
+  $('backgroundFile').value = ''; previewBackground();
+}
+function backgroundControls(disabled) {
+  for (const id of ['saveBackground', 'removeBackground', 'backgroundFile', 'backgroundEnabled', 'surfaceOpacity', 'imageOpacity']) $(id).disabled = disabled;
+}
+for (const id of ['surfaceOpacity', 'imageOpacity']) $(id).addEventListener('input', previewBackground);
+$('backgroundFile').addEventListener('change', async () => {
+  const selection = ++backgroundSelection;
+  const file = $('backgroundFile').files[0]; if (!file) return;
+  backgroundControls(true);
+  try {
+    if (file.size > MAX_RESOURCE_BYTES) throw new Error('背景图片最多 16 MB。');
+    if (!/\.(png|jpe?g|webp|gif)$/i.test(file.name)) throw new Error('请选择 PNG、JPEG、WebP 或 GIF 图片。');
+    const dataUrl = await readDataUrl(file);
+    const image = new Image(); image.src = dataUrl; await image.decode();
+    if (selection !== backgroundSelection) return;
+    backgroundImage = { path: file.name, dataUrl }; $('backgroundEnabled').checked = true; previewBackground();
+    $('backgroundStatus').textContent = '图片已预览。点击保存背景配置后生效。';
+  } catch (error) { $('backgroundStatus').textContent = `图片读取失败：${error.message}`; $('backgroundFile').value = ''; }
+  finally { backgroundControls(false); }
+});
+async function persistBackground(remove = false) {
+  if (backgroundBusy) return; backgroundBusy = true; backgroundControls(true);
+  try {
+    const settings = { enabled: remove ? false : $('backgroundEnabled').checked, surfaceOpacity: Number($('surfaceOpacity').value), imageOpacity: Number($('imageOpacity').value) };
+    const result = await send('background.set', { settings, image: remove ? null : backgroundImage });
+    showBackground(result); $('backgroundStatus').textContent = remove ? '图片已删除、背景已关闭。请返回网页再次应用主题，或恢复原样。' : '背景配置已保存。请返回网页再次应用主题。';
+  } catch (error) { $('backgroundStatus').textContent = error.message; }
+  finally { backgroundBusy = false; backgroundControls(false); }
+}
+$('backgroundForm').addEventListener('submit', event => { event.preventDefault(); persistBackground(); });
+$('removeBackground').addEventListener('click', () => persistBackground(true));
+backgroundControls(true);
+try { showBackground(await send('background.get')); }
+catch (error) { showBackground({ settings: DEFAULT_BACKGROUND, image: null }); $('backgroundStatus').textContent = error.message; }
+finally { backgroundControls(false); }

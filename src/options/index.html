@@ -35,6 +35,22 @@
     <p id="settingsStatus" role="status" aria-live="polite"></p>
   </section>
   <section class="notes"><h2>保留网页的熟悉感</h2><p>默认保留网站宽度、布局和代码配色，保护公式、图表与交互控件。背景图片默认关闭，可在上方开启；页面 CSP 可能影响资源加载。编辑器界面、动画与 @import 暂不支持，处理详情可在日志中查看。</p><p>如果正文没有被正确识别，可以在扩展小窗口中填写正文容器的 CSS 选择器。“恢复原样”随时可以撤回扩展样式。</p></section>
+  <section id="background" aria-labelledby="backgroundTitle">
+    <div class="section-heading"><h2 id="backgroundTitle">给阅读换一张背景</h2><span class="step">03 · 全局背景</span></div>
+    <p class="intro">所有主题共用你上传的图片，与主题配套资源独立。保存后，返回网页再次应用主题。</p>
+    <form id="backgroundForm">
+      <label class="policy"><input id="backgroundEnabled" type="checkbox">启用我的背景图片</label>
+      <label for="backgroundFile">上传或替换图片</label><input id="backgroundFile" type="file" accept=".png,.jpg,.jpeg,.webp,.gif">
+      <p class="hint">PNG / JPEG / WebP / GIF，最多 16 MB。图片居中铺满窗口，保持比例；只保存在这台设备。</p>
+      <div id="backgroundPreview" class="background-preview"><div id="backgroundPreviewImage"></div><div id="backgroundPreviewSurface"><strong>一页，自己的风景。</strong><p>文字不随背景变透明。</p></div></div>
+      <p id="backgroundName" class="hint">尚未上传图片</p>
+      <label for="surfaceOpacity">正文底色不透明度 <output id="surfaceOpacityValue" for="surfaceOpacity">90%</output></label><input id="surfaceOpacity" type="range" min="0" max="100" value="90">
+      <label for="imageOpacity">背景图片不透明度 <output id="imageOpacityValue" for="imageOpacity">50%</output></label><input id="imageOpacity" type="range" min="0" max="100" value="50">
+      <p class="hint">0% 为完全透明，100% 为完全不透明。正文底色优先于主题根背景，代码与引用保留各自底色。网站外层不透明容器可能遮住图片；预览仅示意透明度。</p>
+      <div class="actions"><button id="saveBackground" type="submit">保存背景配置</button><button id="removeBackground" class="secondary" type="button">删除图片并关闭</button></div>
+    </form>
+    <p id="backgroundStatus" role="status" aria-live="polite"></p>
+  </section>
   <footer class="page-footer">选一个喜欢的主题，安心读完下一篇。</footer>
 </main><script type="module" src="index.js"></script></body>
 </html>

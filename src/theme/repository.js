@@ -49,6 +49,7 @@ export async function importTheme(name, source, resources = {}) {
 }
 export async function deleteTheme(id) {
   if (id === DEMO_THEME.id) throw new Error('内置测试主题不能删除。');
+  if (!(await listThemes()).some(theme => theme.id === id)) throw new Error('主题不存在。');
   const themes = (await listThemes()).filter(t => !t.builtIn && t.id !== id);
   await chrome.storage.local.set({ themes });
   await deleteBundle(id);

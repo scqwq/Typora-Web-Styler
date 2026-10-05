@@ -1,6 +1,7 @@
 import { compileTheme } from '../theme/compiler.js';
 import { getTheme } from '../theme/repository.js';
 import { getSettings } from '../settings/repository.js';
+import { getBackground } from '../settings/background-repository.js';
 
 const locks = new Map();
 export function serialize(tabId, task) {
@@ -51,6 +52,7 @@ export async function operate(tabId, request) {
       if (!request.documentToken) throw new Error('请先识别并确认正文。');
       const theme = await getTheme(request.themeId);
       const settings = await getSettings();
+      const background = await getBackground();
       const sessionId = crypto.randomUUID();
       const compiled = compileTheme(theme.source, { sessionId, settings, bundle: theme.bundle });
       const prepared = await command(target, { type: 'prepare', selector: request.selector ?? '', sessionId, settings });
@@ -58,7 +60,7 @@ export async function operate(tabId, request) {
       let inserted = false;
       let resources;
       try {
-        resources = await command(target, { type: 'stage', sessionId, css, fonts: compiled.fonts, images: compiled.images });
+        resources = await command(target, { type: 'stage', sessionId, css, fonts: compiled.fonts, images: compiled.images, background: background.settings.enabled ? background : null });
         await chrome.scripting.insertCSS({ target, css, origin: 'AUTHOR' }); inserted = true;
         await command(target, { type: 'validate' });
         // Commit before deleting the old style so a failed insertion never destroys the existing theme.

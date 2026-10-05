@@ -3,6 +3,7 @@ import { annotate, undo, redo } from './annotator.js';
 import { preserve, undoPreservation, redoPreservation } from './preservation.js';
 import { loadResources, releaseFonts } from './resources.js';
 import { captureReadability, checkReadability } from './contrast.js';
+import { applyBackground, undoBackground, redoBackground } from './background.js';
 
 if (!globalThis.__wmV1) {
   let active = null;
@@ -24,8 +25,8 @@ if (!globalThis.__wmV1) {
     previewAnimation?.cancel(); previewAnimation = null;
     if (stagedCss) { retired.push(stagedCss); stagedCss = null; }
     releaseFonts(stagedFaces); stagedFaces = [];
-    if (pending) { undoPreservation(pending.preservation); undo(pending.annotation.modifications); pending = null; }
-    if (active) { undoPreservation(active.preservation); undo(active.annotation.modifications); releaseFonts(active.faces); if (active.css) retired.push(active.css); active = null; }
+    if (pending) { undoBackground(pending.backgroundState); undoPreservation(pending.preservation); undo(pending.annotation.modifications); pending = null; }
+    if (active) { undoBackground(active.backgroundState); undoPreservation(active.preservation); undo(active.annotation.modifications); releaseFonts(active.faces); if (active.css) retired.push(active.css); active = null; }
   }
   function watch() {
     stopWatching();
@@ -62,7 +63,7 @@ if (!globalThis.__wmV1) {
           previewAnimation?.cancel(); previewAnimation = null;
           if (active) {
             if (active.root !== root) throw new Error('切换正文区域前请先恢复当前主题。');
-            undoPreservation(active.preservation); undo(active.annotation.modifications);
+            undoBackground(active.backgroundState); undoPreservation(active.preservation); undo(active.annotation.modifications);
           }
           let annotation;
           try {
@@ -73,7 +74,7 @@ if (!globalThis.__wmV1) {
             return { documentToken, id: pending.id, protectionCss: annotation.css, protectedCount: annotation.protectedCount, preservedCount: preservation.length };
           } catch (error) {
             if (annotation) undo(annotation.modifications);
-            if (active) { redo(active.annotation.modifications); redoPreservation(active.preservation); }
+            if (active) { redo(active.annotation.modifications); redoPreservation(active.preservation); redoBackground(active.backgroundState); }
             throw error;
           }
         }
@@ -84,10 +85,18 @@ if (!globalThis.__wmV1) {
           const loaded = await loadResources(command.fonts, command.images);
           if (pending !== next || !next.root.isConnected || next.url !== pageUrl()) { releaseFonts(loaded.faces); throw new Error('资源加载期间页面已变化。'); }
           stagedFaces = loaded.faces;
+          if (command.background) {
+            const checked = await loadResources([], [command.background.image]);
+            if (pending !== next || !next.root.isConnected || next.url !== pageUrl()) throw new Error('背景加载期间页面已变化。');
+            if (checked.failures.length) throw new Error(`自定义背景加载失败：${checked.failures.join('；')}`);
+            next.background = command.background;
+          }
           return { fontLoaded: loaded.faces.length, failures: loaded.failures };
         }
-        case 'validate':
+        case 'validate': {
+          if (pending?.background) pending.backgroundState = applyBackground(pending.root, pending.background);
           checkReadability((pending ?? active)?.readability ?? []); return {};
+        }
         case 'commit': {
           const next = pending ?? active;
           if (!next || next.id !== command.sessionId || !next.root.isConnected || next.url !== pageUrl()) {
@@ -100,9 +109,9 @@ if (!globalThis.__wmV1) {
           pending = null; stagedCss = null; watch(); return { active: true };
         }
         case 'rollback':
-          if (pending) { undoPreservation(pending.preservation); undo(pending.annotation.modifications); pending = null; }
+          if (pending) { undoBackground(pending.backgroundState); undoPreservation(pending.preservation); undo(pending.annotation.modifications); pending = null; }
           releaseFonts(stagedFaces); stagedFaces = [];
-          if (active) { redo(active.annotation.modifications); redoPreservation(active.preservation); }
+          if (active) { redo(active.annotation.modifications); redoPreservation(active.preservation); redoBackground(active.backgroundState); }
           stagedCss = null;
           return {};
         case 'restore':
