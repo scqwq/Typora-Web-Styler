@@ -1,6 +1,6 @@
 # Typora Web Styler 项目指南与窗口接力记录
 
-版本：0.6 · 更新日期：2026-10-05 · 状态：Typora Web Styler 0.2.0；统一配置、本地字体/图片、日志已实现。用户已反馈真实 Typora 主题可以导入，复杂主题仍需逐项验收。
+版本：0.7 · 更新日期：2026-10-05 · 状态：Typora Web Styler 0.3.0；统一配置、本地资源、全局背景、标签页自动应用、日志已实现。用户真实主题与复杂网站仍需逐项验收。
 
 ## 1. 指南入口与优先级
 
@@ -24,19 +24,19 @@
 
 ## 3. 当前实际状态
 
-- 新项目已实现 Manifest V3 插件、主题导入/删除、AST 自动转换、正文识别/确认、应用/切换/恢复、转换报告和基本导航清理。独立本地 Git 仓库位于 main 分支；首版提交为 `3aae32c`，0.2 功能提交为 `19bec7f`。用户本次授权文档更名、README 整理和忽略规则完成后提交本地 commit，没有授权推送。
-- 已生成可加载的 `dist/`；安装方式见 README.md，加载该目录，不是根目录。正式 manifest 仅有 activeTab/scripting/storage，没有持久 host 权限。
+- 新项目已实现 Manifest V3 插件、主题导入/删除、AST 自动转换、正文识别/确认、应用/切换/恢复、全局背景与临时标签页自动应用。独立本地 Git 仓库位于 main 分支；首版提交为 `3aae32c`，0.2 功能提交为 `19bec7f`。用户本次授权更新 README/项目指南，并将 0.3.0 功能与文档提交本地 commit，没有授权推送。
+- 已生成可加载的 `dist/`；安装方式见 README.md，加载该目录，不是根目录。0.3 正式 manifest 必需权限仅 activeTab/scripting/storage，webNavigation 和 HTTP/HTTPS host 权限为可选，按用户启用功能申请，不默认授予持久 host 权限。
 - 旧项目在 `markdown-viewer/`，有自己的 Git 历史和用户未提交改动。新仓库忽略整个旧参考目录，不会将它作为嵌套仓库加入分发或版本记录；参考代码需实际复制到新源码并记录来源。
 - 旧目录有用户修改的 README、构建脚本和新增中文方案，必须保留。
 - 项目目前位于 `D:\moresoftware\Web-markdown-theme`，原路径已不可用。本次只更新项目文档名称，不再次移动目录；定位源码以实际工作区为准，内层旧项目保持只读。
 - 用户已在自己的浏览器确认 Typora 主题可以正常导入；未提供该主题文件给 agent，不能将该反馈当成所有资源、结构或恢复均已验收。
 - 第一测试页面：`https://saurlax.com/blog/fundamentals-of-artificial-intelligence#人工智能概述`。本次通过独立无头 Edge 加载真实网页，确认正文为 `article#article-content`，有 4 个 pre 代码块、133 个公式候选及 13 个 SVG/图表候选。已为这个具体路径添加适配器，不推断所有 Saurlax 页面结构一致。
-- 转换/资源/配置/日志共 16 项行为测试通过；独立无头 Edge 已验证实际 popup、导入、作用范围、交互、应用/切换/恢复、失败回退和后台重启。0.2 新增浏览器检查包含全局保留开关、important/font 简写、主题间共享配置、原站新增内联修改、本地字体加载/释放、图片、CSP 及日志筛选/导出/清空；最终运行结果以 artifacts/browser-results.json 为准。
+- 当前 Node 行为测试共 21 项（含独立背景与自动应用配置/范围/权限检查）通过。独立无头 Edge 的原功能及全局背景回归通过；新增自动应用检查覆盖两个开关、标签页登记、刷新/SPA/延迟正文、范围限制、暂停恢复和后台重启，并验证 go-zero 刷新和环境安装章节点击。报告分别为 artifacts/browser-results.json 与 auto-browser-results.json；真实浏览器原生可选授权弹窗未自动化。
 - 目标站已用内置测试主题完成应用/撤销和前后截图检查；测试产物在 artifacts/，报告为 browser-results.json。后台/页面没有测试环境捕获的未处理错误。正式 activeTab 点击授权流程仍需要用户在日常 Edge/Chrome 中手动确认，Chrome 未单独实测。
-- 自动化复制 dist 到独立测试扩展，并仅在该副本添加本地测试页和 Saurlax 的 host 权限。不要把测试 manifest 分发或用它宣称正式插件具有持久网站权限。
+- 原回归仅在独立测试副本添加本地页/Saurlax host 权限；自动应用脚本在另一测试副本预授予 webNavigation 与 HTTP/HTTPS host 权限，实际修改仍由标签页登记决定。不要分发这些测试 manifest，或把预授予测试结果当成正式授权弹窗已验证。
 - 用户已在日常浏览器安装插件，并反馈内置主题“貌似成功”；这是用户初步试用反馈，不替代实际主题、所有交互与恢复的完整验收。用户没有看到正文高亮，需后续改进确认范围的体验。
 - 旧项目的构建成功不代表新项目可构建、可加载或已完成浏览器验证。
-- 0.2 已支持 1 MB 主 CSS、最多 64 个本地资源（单个 16 MB、合计 24 MB）、主题目录选择、字体隔离加载、可选背景图片、11 项统一配置、持久日志页面。通用评分、网页点选、按站点自动应用、@import 合并和 ZIP 资源包仍未实现。
+- 当前支持 1 MB 主 CSS、最多 64 个本地资源（单个 16 MB、合计 24 MB）、主题目录选择、字体隔离加载、背景图片、11 项统一配置、独立全局背景、临时标签页自动应用与持久日志。通用评分、网页点选、独立永久站点规则、@import 合并和 ZIP 资源包仍未实现。
 
 ### 3.1 全局自定义背景（2026-10-05 新增）
 
@@ -47,6 +47,20 @@
 新背景纳入 prepare/commit/rollback/restore/导航清理；失败恢复旧背景，切换不重复叠层，撤销保留网站随后修改的声明。保存配置后再次应用，不实时修改其他标签页。独立背景设置不随普通样式“恢复默认”重置；使用“删除图片并关闭”。背景图片下的对比度仅抽样，不能代表真实图像阅读效果。
 
 验证结果见本次更新记录与 artifacts/browser-results.json；正式 activeTab 及用户真实图片/网站仍需实际浏览器确认。
+
+### 3.2 标签页自动应用（0.3.0）
+
+用户已确认两个全局偏好，默认均关闭：enabled“当前标签页自动使用主题”；sameSiteOnly“仅限该标签页下的相同网站”，仅 enabled 开启可操作。设置页不选目标，不直接登记标签页。小窗口成功手动应用后登记 tabId、原 origin、主题 ID、正文选择器；多个标签页分别登记。相同网站按协议/主机/端口判断，路径不限；跨网站模式丢弃原站选择器重新识别。
+
+偏好存储在 local.autoSettings；临时规则存储在 storage.session.autoTabs，可跨后台休眠，关闭标签页删除，浏览器重启/扩展重载或更新清除。保存关闭偏好会清除登记但不撤销已应用样式。恢复原样先暂停该标签页，刷新保持暂停，成功手动应用可恢复并更新主题。主题删除后下次自动应用失败会记日志，不静默改用其他主题。
+
+新增 src/shared/auto-policy.js（配置、origin/host pattern 与范围判断）、src/settings/auto-repository.js（偏好和实际权限检查）、src/background/auto-service.js（登记、暂停、导航调度、有限重试）。background/index 增加 auto.get/set，分别对 UI 手动操作和自动流程协调；article-service 接受后台内部 expectedDocumentId，拒绝过期自动请求。controller 的 status 同步检查路径/正文有效性；旧会话 cleanup 消息亦触发允许范围内的重试。自动 locate 不显示动画。小窗口在成功识别后默认勾选“使用已识别的正文区域”，修改选择器后仍须重新识别。
+
+事件涵盖 DOMContentLoaded、Completed、HistoryStateUpdated、ReferenceFragmentUpdated，及当前正文整体替换后的 cleanup。仅已登记且未暂停标签页执行；每个标签页串行，每次调度取消旧重试，后台休眠后由新事件重新调度。正文检测最多约 12 秒有限重试；明确检测成功后的编译/资源/注入失败不无限重试。不能保证任意异步站点加载时机与新增复杂节点保护。
+
+设置页保存开启时申请可选 webNavigation；跨网站同时申请 HTTP/HTTPS host 权限；相同网站模式在网页小窗口点击应用时按需请求该网站 host。拒绝网站权限仍允许手动应用，自动能力可能只在 activeTab 临时授权有效时成立。后台无可选 API namespace 时不安装导航监听，授权后再安装，确保默认手动功能仍能启动。
+
+新增 scripts/auto-browser-check.mjs、tests/auto.test.js 和 pnpm run test:browser:auto。独立 Edge 已实测 go-zero 入门页通用规则选择 main（含标题正文，不含左右导航），刷新后自动应用，点击环境安装后自动重新应用；实际下一页为 /zh-cn/getting-started/installation/。这两页结果不代表全站验证。Native 可选授权弹窗仍需日常浏览器手测；拒绝场景仅在 UI API 边界模拟。
 
 ## 4. 用户新增想法与设计判断
 
@@ -115,6 +129,7 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
     background/
       index.js                # 消息、权限和页面注入协调
       article-service.js      # 应用、切换、恢复及 CSS 注入记录
+      auto-service.js         # 临时标签页登记、导航自动应用及暂停
     content/
       controller.js           # 页面内会话生命周期
       detector.js             # 正文候选与选择器验证
@@ -134,10 +149,14 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
       transforms/values.js    # 声明值、变量、rem、图片引用转换
       compatibility/code.js   # CodeMirror 到已有 token 结构映射
     settings/repository.js    # 一套全局配置读取与保存
+    settings/auto-repository.js # 自动应用偏好与可选权限检查
+    settings/background-repository.js # 独立背景图片与配置
     diagnostics/logger.js     # 有界持久日志、脱敏和串行存储
     shared/
       messages.js             # 可序列化消息契约
       style-policy.js         # 属性白名单、配置默认值及验证
+      auto-policy.js          # 自动应用配置及网站范围契约
+      background-policy.js    # 独立背景数值配置契约
     popup/                    # 应用、主题选择、恢复
     options/                  # 主题/本地资源导入、全局配置
     logs/                     # 日志筛选、搜索、导出及清空
@@ -146,6 +165,8 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
     compiler.test.js
     resources.test.js         # 1 MiB 边界、路径/字体/图片/代码映射与配置
     logs.test.js              # 日志次序、容量、脱敏、清空
+    auto.test.js              # 开关、origin 边界与权限检查
+    background.test.js        # 独立背景数值范围
     fixtures/                 # 测试主题及代表性 DOM
   dist/                       # 已构建输出，浏览器加载此目录
   artifacts/                  # 不入 Git：浏览器报告、截图、测试扩展副本
@@ -165,6 +186,7 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 | src/manifest.json | 插件名称、版本、权限、后台和界面入口 | 修改权限或加载入口看此源文件，不能只改 dist/manifest.json |
 | src/background/index.js | 验证消息来源，分发 theme/article 请求，串行化主题写入与页面操作 | 新增扩展操作、检查请求参数和消息权限 |
 | src/background/article-service.js | 固定 tab/document 注入目标，调度编译，插入/删除 CSS，处理失败与后台重启遗留状态 | 查应用、切换、恢复和注入失败问题 |
+| src/background/auto-service.js、src/settings/auto-repository.js、src/shared/auto-policy.js | 临时标签页登记、范围/权限检查、导航重试、暂停恢复 | 查刷新或切页后自动应用、相同网站限制和授权问题 |
 | src/content/detector.js | 验证用户选择器，站点规则优先，检查可见性/文字量/候选歧义 | 查“正文区域”、自动识别失败或误选范围 |
 | src/content/adapters/ | 仅存具体网站的已验证正文规则 | 新网站适配与实时 DOM 验证记录；当前只有 saurlax.js |
 | src/content/controller.js | 保存页面内选区和会话状态，调度标记/校验/撤销，预览高亮，观察正文替换和路径变化 | 查高亮、确认、会话阶段与 SPA 结束行为 |
@@ -186,6 +208,7 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 | src/diagnostics/logger.js、src/logs/ | 分别负责本地日志队列/脱敏/容量和日志页面 | 查记录缺失、筛选、搜索、导出和清空 |
 | scripts/build.mjs | 本地打包、复制 manifest/静态界面、汇总依赖许可 | 查 dist 产物和依赖是否被打包 |
 | scripts/browser-check.mjs | 独立浏览器的夹具、弹窗和目标站验证 | 查自动化流程、测试权限副本和截图 |
+| scripts/auto-browser-check.mjs | 独立 Edge 自动应用夹具及 go-zero 验证 | 查导航、延迟正文、登记/暂停与可选授权模拟 |
 | tests/compiler.test.js、tests/fixtures/ | CSS 编译行为测试与代表性正文 HTML | 修改转换规则时补充对应输入和行为验证 |
 | dist/、artifacts/、.cache/ | 分别是正式构建输出、验证产物、依赖/浏览器缓存 | 都不是手写业务源码，不能把修复只写进生成目录 |
 | markdown-viewer/ | 旧项目参考 | 默认只读，不属于新插件架构和构建范围 |
@@ -251,7 +274,7 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 
 ## 11. 权限与复用边界
 
-首版手动应用声明 activeTab、scripting、storage。自动应用以后按用户开启的站点申请可选 host 权限，不默认申请全部网站持久访问。受限浏览器页面和跨域 iframe 不属于首版。
+手动应用必需权限保持 activeTab、scripting、storage。0.3 自动应用按需申请可选 webNavigation：相同网站模式在手动应用时请求该网站 host 权限，跨网站模式在设置页保存时请求 HTTP/HTTPS host 权限；即使得到广泛授权，也只修改已登记标签页。默认不授予全部网站持久访问，关闭开关清除登记但不自动撤回已授予权限。受限浏览器页面和跨域 iframe 不支持。
 
 可参考旧项目的文件读取、消息传递、扩展结构和注入 API 用法，但独立重写正文检测、CSS 转换、样式策略和会话控制。
 
@@ -303,7 +326,7 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 
 ### P1：日常使用
 
-0.2 已完成统一保留开关、本地资源/目录、日志；后续完善通用检测和点选、站点规则、自动应用、动态新节点保护及 @import/ZIP 资源包。
+0.3 已完成统一保留开关、本地资源/目录、日志、独立全局背景和临时标签页自动应用。后续完善通用检测和点选、独立永久站点规则、更复杂异步导航、动态新节点保护及 @import/ZIP 资源包。
 
 ### P2：兼容性扩展
 
@@ -336,7 +359,11 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 
 | 2026-10-05 | 新增独立全局背景：设置页上传/预览/删除用户图片，正文底色与图片不透明度分别调整；IndexedDB 独立记录、页面背景层与正文根覆盖，纳入主题切换/失败回退/恢复 | 18 项 Node 行为测试与构建通过；独立 Edge 的上传保存/刷新设置页/删除、双透明度、主题切换不叠层、根背景覆盖、失败回退、后台重启持久化、恢复与保留网站后改声明通过；原浏览器夹具及 Saurlax 回归通过，无未处理错误。已查看全局背景与设置页截图；正式权限流程及用户真实图片/复杂外层容器仍需日常浏览器确认。未提交/推送 |
 
-后续记录具体文件、行为变化、验证结果和未完成项。下一窗口先读取 README 与 browser-results.json；优先取得真实 Typora CSS，进行用户浏览器中的手动安装/主题视觉验收，再按需求推进 P1。不要重新从空项目开始。
+| 2026-10-05 | 新增 0.3.0 临时标签页自动应用：设置页两层开关、成功手动应用后登记、刷新/导航/正文替换重识别、相同 origin 限制、跨站权限、恢复后暂停；成功识别默认勾选确认框 | 21 项 Node 测试与构建通过；独立 Edge 自动应用夹具及 go-zero 入门刷新/环境安装点击通过，原功能/背景/Saurlax 回归通过。已查看设置页与 go-zero 截图，无捕获的未处理错误。原生可选授权弹窗需日常浏览器手测；有限重试不保证任意异步站点。同步版本/文档与 npm 锁元信息，未增依赖、未提交/推送 |
+
+| 2026-10-05 | 根据用户要求补齐 0.3.0 README 与 AGENTS 入口：ZIP 免构建安装、标签页开关操作、权限/暂停/升级说明及接手检查；同步修正本指南的 P1 与权限现状，并将功能和文档提交本地 commit | 核对已有原功能/背景/Saurlax 及自动应用/go-zero 报告均通过、无捕获的未处理错误；本次仅补文档，未重复运行浏览器测试。提交不包含 dist、ZIP、artifacts、缓存或旧项目，不推送 |
+
+后续记录具体文件、行为变化、验证结果和未完成项。下一窗口先读取 README、browser-results.json 与 auto-browser-results.json；优先在用户日常浏览器确认正式可选权限、真实主题/背景和文档导航，再按需求推进 P1。不要重新从空项目开始。
 
 ## 15. 官方资料
 

@@ -31,8 +31,9 @@ async function cleanup(target, cssList) {
   }
   if (removed.length) await command(target, { type: 'ackCleanup', css: removed });
 }
-export async function operate(tabId, request) {
+export async function operate(tabId, request, expectedDocumentId) {
   const target = await bootstrap(tabId);
+  if (expectedDocumentId && expectedDocumentId !== target.documentIds[0]) throw new Error('网页已导航，取消过期的自动应用。');
   let status = await command(target, { type: 'status' });
   // A terminated worker can leave an uncommitted insertion. The page records it before injection.
   if (status.stagedCss || status.pending) {
@@ -44,7 +45,7 @@ export async function operate(tabId, request) {
   if (request.documentToken && request.documentToken !== status.documentToken) throw new Error('网页已导航，请重新识别正文。');
   switch (request.type) {
     case 'article.status': return status;
-    case 'article.locate': return command(target, { type: 'locate', selector: request.selector ?? '' });
+    case 'article.locate': return command(target, { type: 'locate', selector: request.selector ?? '', preview: request.preview !== false });
     case 'article.restore': {
       const ended = await command(target, { type: 'restore' }); await cleanup(target, ended.retired); return { active: false };
     }
@@ -71,7 +72,7 @@ export async function operate(tabId, request) {
       }
       const committed = await command(target, { type: 'status' });
       await cleanup(target, committed.retired);
-      return { active: true, themeId: theme.id, report: compiled.report, protectedCount: prepared.protectedCount, preservedCount: prepared.preservedCount, settings, resources };
+      return { active: true, documentId: target.documentIds[0], themeId: theme.id, report: compiled.report, protectedCount: prepared.protectedCount, preservedCount: prepared.preservedCount, settings, resources };
     }
     default: throw new Error('未知页面操作。');
   }

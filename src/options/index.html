@@ -3,7 +3,7 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler · 主题管理</title><link rel="stylesheet" href="index.css"></head>
 <body><main>
   <header>
-    <div class="brand-row"><span class="brand-mark" aria-hidden="true">TS</span><span class="eyebrow">Typora Web Styler</span><span class="version">v0.2.0</span></div>
+    <div class="brand-row"><span class="brand-mark" aria-hidden="true">TS</span><span class="eyebrow">Typora Web Styler</span><span class="version">v0.3.0</span></div>
     <div class="hero"><div><h1>让阅读，舒服一点。</h1><p>把喜欢的 Typora 排版带到网页里，留下文章原本的内容与交互。</p></div><nav aria-label="页面导航"><a href="#settings">调整样式</a><a href="../logs/index.html">查看日志 ↗</a></nav></div>
   </header>
   <div class="workspace">
@@ -50,6 +50,19 @@
       <div class="actions"><button id="saveBackground" type="submit">保存背景配置</button><button id="removeBackground" class="secondary" type="button">删除图片并关闭</button></div>
     </form>
     <p id="backgroundStatus" role="status" aria-live="polite"></p>
+  </section>
+  <section id="automation" aria-labelledby="automationTitle">
+    <div class="section-heading"><h2 id="automationTitle">让这一页，继续用喜欢的主题</h2><span class="step">04 · 自动应用</span></div>
+    <p class="intro">这里只设置偏好。在网页小窗口中成功应用一次主题后，才会记住那个标签页及所选主题。</p>
+    <form id="automationForm">
+      <label class="policy"><input id="autoEnabled" type="checkbox">当前标签页自动使用主题</label>
+      <p class="hint">已登记的标签页刷新、切换章节时自动识别正文。其他标签页不受影响；分别手动应用后可各自登记。</p>
+      <label class="policy"><input id="sameSiteOnly" type="checkbox" disabled>仅限该标签页下的相同网站</label>
+      <p class="hint">勾选后只跟随最初登记的网站；不勾选则可跟随该标签页跨网站导航，需要额外的网站访问授权。</p>
+      <p class="hint">关闭标签页、重启浏览器或重新加载扩展后，临时登记会清除。“恢复原样”会暂停该标签页自动应用，再次手动应用后恢复。识别不明确的页面会跳过。</p>
+      <div class="actions"><button id="saveAuto" type="submit">保存自动应用偏好</button></div>
+    </form>
+    <p id="autoStatus" role="status" aria-live="polite"></p>
   </section>
   <footer class="page-footer">选一个喜欢的主题，安心读完下一篇。</footer>
 </main><script type="module" src="index.js"></script></body>

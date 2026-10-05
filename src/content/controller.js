@@ -28,14 +28,15 @@ if (!globalThis.__wmV1) {
     if (pending) { undoBackground(pending.backgroundState); undoPreservation(pending.preservation); undo(pending.annotation.modifications); pending = null; }
     if (active) { undoBackground(active.backgroundState); undoPreservation(active.preservation); undo(active.annotation.modifications); releaseFonts(active.faces); if (active.css) retired.push(active.css); active = null; }
   }
+  function checkSession() {
+    if (active && (!active.root.isConnected || active.url !== pageUrl())) {
+      end(); selected = null; notice = '页面或正文已变化，旧主题会话已结束。';
+      chrome.runtime.sendMessage({ type: 'article.cleanup' }).catch(() => {});
+    }
+  }
   function watch() {
     stopWatching();
-    const check = () => {
-      if (active && (!active.root.isConnected || active.url !== pageUrl())) {
-        end(); selected = null; notice = '页面或正文已变化，主题会话已结束，请重新识别。';
-        chrome.runtime.sendMessage({ type: 'article.cleanup' }).catch(() => {});
-      }
-    };
+    const check = checkSession;
     observer = new MutationObserver(check);
     observer.observe(document.documentElement, { childList: true, subtree: true });
     timer = setInterval(check, 1000);
@@ -49,12 +50,13 @@ if (!globalThis.__wmV1) {
     async dispatch(command) {
       switch (command.type) {
         case 'status':
+          checkSession();
           return { documentToken, active: !!active, pending: !!pending, themeId: active?.themeId, description: active ? describe(active.root) : null, notice, css: active?.css, sessionId: active?.id, retired: [...retired], stagedCss };
         case 'locate': {
           selected = locate(document, command.selector); selectedUrl = pageUrl(); notice = '';
           // A browser animation changes no DOM attributes and is cancelled automatically.
           previewAnimation?.cancel();
-          previewAnimation = selected.animate([{ outline: '3px solid #8b5cf6', outlineOffset: '4px' }, { outline: '3px solid transparent', outlineOffset: '4px' }], { duration: 1800 });
+          if (command.preview !== false) previewAnimation = selected.animate([{ outline: '3px solid #8b5cf6', outlineOffset: '4px' }, { outline: '3px solid transparent', outlineOffset: '4px' }], { duration: 1800 });
           return { documentToken, description: describe(selected) };
         }
         case 'prepare': {

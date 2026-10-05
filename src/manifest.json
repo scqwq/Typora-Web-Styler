@@ -1,9 +1,11 @@
 {
   "manifest_version": 3,
   "name": "Typora Web Styler",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "将 Typora CSS 主题应用到当前网页正文，支持主题导入、切换与恢复。",
   "permissions": ["activeTab", "scripting", "storage"],
+  "optional_permissions": ["webNavigation"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
   "action": { "default_title": "Typora Web Styler", "default_popup": "popup/index.html" },
   "background": { "service_worker": "background/index.js", "type": "module" },
   "options_page": "options/index.html"

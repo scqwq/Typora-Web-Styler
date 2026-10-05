@@ -2,6 +2,7 @@ import { send, reportText } from '../shared/messages.js';
 import { DEFAULT_POLICY, POLICY_FIELDS } from '../shared/style-policy.js';
 import { MAX_CSS_BYTES, MAX_RESOURCE_BYTES, MAX_BUNDLE_BYTES, MAX_FILES } from '../theme/resources.js';
 import { DEFAULT_BACKGROUND } from '../shared/background-policy.js';
+import { WEB_ORIGINS } from '../shared/auto-policy.js';
 const $ = id => document.getElementById(id);
 let busy = false;
 async function render() {
@@ -130,3 +131,30 @@ backgroundControls(true);
 try { showBackground(await send('background.get')); }
 catch (error) { showBackground({ settings: DEFAULT_BACKGROUND, image: null }); $('backgroundStatus').textContent = error.message; }
 finally { backgroundControls(false); }
+
+function showAuto(settings) {
+  $('autoEnabled').checked = settings.enabled; $('sameSiteOnly').checked = settings.sameSiteOnly;
+  $('sameSiteOnly').disabled = !settings.enabled;
+}
+$('autoEnabled').addEventListener('change', () => { $('sameSiteOnly').disabled = !$('autoEnabled').checked; });
+$('automationForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const settings = { enabled: $('autoEnabled').checked, sameSiteOnly: $('sameSiteOnly').checked };
+  $('saveAuto').disabled = true; $('autoEnabled').disabled = true; $('sameSiteOnly').disabled = true;
+  try {
+    if (settings.enabled) {
+      // Request synchronously from the submit gesture, before messaging the service worker.
+      const granted = await chrome.permissions.request({ permissions: ['webNavigation'], ...(settings.sameSiteOnly ? {} : { origins: WEB_ORIGINS }) });
+      if (!granted) throw new Error('未取得授权，自动应用偏好未保存。可以勾选仅限相同网站后重试。');
+    }
+    const result = await send('auto.set', { settings }); showAuto(result);
+    $('autoStatus').textContent = settings.enabled ? '偏好已保存。请在要登记的网页小窗口中应用一次主题。' : '自动应用已关闭，临时标签页登记已清除。已应用的样式可在小窗口恢复原样。';
+  } catch (error) {
+    $('autoStatus').textContent = error.message;
+    try { showAuto(await send('auto.get')); } catch {}
+  } finally { $('saveAuto').disabled = false; $('autoEnabled').disabled = false; $('sameSiteOnly').disabled = !$('autoEnabled').checked; }
+});
+$('saveAuto').disabled = true; $('autoEnabled').disabled = true;
+try { showAuto(await send('auto.get')); }
+catch (error) { $('autoStatus').textContent = error.message; }
+finally { $('saveAuto').disabled = false; $('autoEnabled').disabled = false; }
