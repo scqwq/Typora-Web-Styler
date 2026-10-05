@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Web-markdown",
+  "name": "Typora Web Styler",
   "version": "0.2.0",
   "description": "将 Typora CSS 主题应用到当前网页正文，支持主题导入、切换与恢复。",
   "permissions": ["activeTab", "scripting", "storage"],
-  "action": { "default_title": "Web-markdown", "default_popup": "popup/index.html" },
+  "action": { "default_title": "Typora Web Styler", "default_popup": "popup/index.html" },
   "background": { "service_worker": "background/index.js", "type": "module" },
   "options_page": "options/index.html"
 }

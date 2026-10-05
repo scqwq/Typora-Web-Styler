@@ -1,16 +1,20 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Web-markdown</title><link rel="stylesheet" href="index.css"></head>
-<body><header><span class="badge">Wm</span><div><h1>Web-markdown</h1><p>让当前正文换上你的主题</p></div></header>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler</title><link rel="stylesheet" href="index.css"></head>
+<body>
+<header><span class="badge" aria-hidden="true">TS</span><div><h1>Typora Web Styler</h1><p>换个喜欢的排版，慢慢读。</p></div></header>
 <main>
-  <label for="theme">正文主题</label><select id="theme"></select>
-  <label for="selector">正文区域 <span>可留空尝试识别</span></label>
-  <input id="selector" placeholder="例如 article 或 .post-content" autocomplete="off">
-  <button id="locate" class="secondary">识别正文</button>
-  <div id="target" class="target">先识别正文，再确认应用。</div>
-  <label class="check"><input id="confirm" type="checkbox" disabled>我确认高亮区域是文章正文</label>
-  <div class="actions"><button id="apply" disabled>应用主题</button><button id="restore" class="secondary">恢复原样</button></div>
+  <div class="panel">
+    <label for="theme">这次，想用哪个主题？</label><select id="theme"></select>
+    <label for="selector">正文在哪里？<span>可以留空，让我们先试着识别。</span></label>
+    <input id="selector" placeholder="例如 article 或 .post-content" autocomplete="off">
+    <button id="locate" class="secondary">识别正文</button>
+    <div id="target" class="target">识别后，先看一眼正文范围。</div>
+    <label class="check"><input id="confirm" type="checkbox" disabled>我确认高亮区域是文章正文</label>
+    <div class="actions"><button id="apply" disabled>应用主题</button><button id="restore" class="secondary">恢复原样</button></div>
+  </div>
   <p id="status" role="status" aria-live="polite"></p>
-  <details id="reportBox" hidden><summary>转换报告</summary><pre id="report"></pre></details>
-  <p class="hint">保留原页面布局。代码配色、字体等细节可在统一配置中调整。</p>
-</main><footer><button id="options" class="link">主题、统一配置与日志 →</button><span>0.2.0</span></footer>
+  <details id="reportBox" hidden><summary>看看转换详情</summary><pre id="report"></pre></details>
+  <p class="hint">保留网页的原有布局。字体、代码配色等细节，可以在设置里调整。</p>
+</main>
+<footer><button id="options" class="link">主题收藏 · 偏好 · 日志 ↗</button><span>v0.2.0</span></footer>
 <script type="module" src="index.js"></script></body></html>

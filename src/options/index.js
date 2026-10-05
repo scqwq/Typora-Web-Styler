@@ -4,7 +4,7 @@ import { MAX_CSS_BYTES, MAX_RESOURCE_BYTES, MAX_BUNDLE_BYTES, MAX_FILES } from '
 const $ = id => document.getElementById(id);
 let busy = false;
 async function render() {
-  const themes = await send('theme.list'); $('themes').replaceChildren();
+  const themes = await send('theme.list'); $('themeCount').textContent = `${themes.length} 个主题`; $('themes').replaceChildren();
   for (const theme of themes) {
     const card = document.createElement('div'); card.className = 'theme';
     const row = document.createElement('div'); row.className = 'row';
@@ -49,9 +49,23 @@ $('importForm').addEventListener('submit', async event => {
 });
 function readDataUrl(file) { return new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error(`读取资源失败：${file.name}`)); reader.readAsDataURL(file); }); }
 function showPolicy(settings) { for (const [key] of POLICY_FIELDS) $(key).checked = settings[key]; }
-for (const [key, text] of POLICY_FIELDS) {
-  const label = document.createElement('label'); label.className = 'policy'; const input = document.createElement('input'); input.type = 'checkbox'; input.id = key;
-  label.append(input, document.createTextNode(text)); $('policyFields').append(label);
+const policyGroups = [
+  { title: '正文排版', description: '勾选后，保留网页原本的对应样式。', keys: ['preserveHeadingSize', 'preserveHeadingColor', 'preserveBodyFont', 'preserveBodySize', 'preserveLineHeight', 'preserveLinkColor'] },
+  { title: '代码阅读', description: '照顾原有高亮，也可以试试主题的配色。', keys: ['preserveCodeColors', 'preserveCodeBackground'] },
+  { title: '字体与背景', description: '按需启用主题的配套资源。', keys: ['enableFonts', 'enableBackgroundImages', 'useThemeBackground'] }
+];
+for (const group of policyGroups) {
+  const fieldset = document.createElement('fieldset'); fieldset.className = 'policy-group';
+  const legend = document.createElement('legend'); legend.textContent = group.title;
+  const description = document.createElement('p'); description.textContent = group.description;
+  fieldset.append(legend, description);
+  for (const key of group.keys) {
+    const text = POLICY_FIELDS.find(([field]) => field === key)[1];
+    const label = document.createElement('label'); label.className = 'policy';
+    const input = document.createElement('input'); input.type = 'checkbox'; input.id = key;
+    label.append(input, document.createTextNode(text)); fieldset.append(label);
+  }
+  $('policyFields').append(fieldset);
 }
 async function savePolicy(settings) {
   $('saveSettings').disabled = true; $('resetSettings').disabled = true;

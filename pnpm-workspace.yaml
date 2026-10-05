@@ -1,0 +1,10 @@
+packages:
+  - '.'
+
+# Keep dependency caches inside the ignored project cache.
+storeDir: .cache/pnpm/store
+
+# esbuild needs its platform binary during installation.
+allowBuilds:
+  esbuild: true
+strictDepBuilds: true

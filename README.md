@@ -9,12 +9,14 @@
 
 ## 环境与快速开始
 
-当前版本 **0.2.0**。构建需要 **Node.js 20+、npm**；优先支持 Windows 上的 Chrome / Edge / 大部分浏览器，PowerShell 即可。
+当前版本 **0.2.0**。构建需要 **Node.js 20+、pnpm 12**（也支持 npm）；优先支持 Windows 上的 Chrome / Edge / 大部分浏览器，PowerShell 即可。
 
 ```powershell
-npm ci --cache .cache/npm
-npm run build
+pnpm install --frozen-lockfile
+pnpm run build
 ```
+
+使用 npm 也可以：`npm ci --cache .cache/npm`，然后 `npm run build`。
 
 1. 打开 `edge://extensions` 或 `chrome://extensions`，启用开发人员模式，加载项目的 **`dist/`** 目录。
 2. 打开博客，点击扩展图标，选择“纸笺 · 测试主题” → 识别正文 → 确认范围 → 应用主题。
@@ -26,7 +28,7 @@ npm run build
 
 “正文区域”填写 CSS 选择器，例如 `.post-content`，不是 URL 或 Markdown 文件路径。留空会尝试已验证的站点规则及 `article/main/[role=main]`；匹配不明确时需手动指定唯一正文容器。Saurlax 的人工智能基础文章已验证为 `article#article-content`。高亮是整个容器边缘约 1.8 秒的紫色轮廓，长文章可能不容易看清。
 
-切换主题时重新识别、确认，再应用所选主题。更新插件后刷新网页，可清理旧版页面控制器；已导入主题保留，0.2 能读取 0.1 的主题记录。旧版插件界面目前仍可能显示历史名称 Web-markdown。
+切换主题时重新识别、确认，再应用所选主题。更新插件后刷新网页，可清理旧版页面控制器；已导入主题保留，0.2 能读取 0.1 的主题记录。主题管理页与弹窗采用暖白、浅绿的圆润界面；配套资源在导入区的折叠项中，统一配置按正文排版、代码阅读、字体与背景分组。
 
 ## 导入自己的主题与资源
 
@@ -97,10 +99,16 @@ npm run build
 ## 开发、验证与接力
 
 ```powershell
-npm test
-npm run build
-npm run test:browser
+pnpm test
+pnpm run build
+pnpm run test:browser
 ```
+
+项目通过 `packageManager` 固定 pnpm **12.3.4**，并提供 `pnpm-lock.yaml`；`pnpm-workspace.yaml` 仅包含当前项目，将依赖存储放在 `.cache/pnpm/store`，允许 esbuild 必需的安装脚本。无需手动切换为宽松的依赖提升模式，构建会按实际依赖关系收集第三方许可证。
+
+尚未安装 pnpm 时，参见 [pnpm 官方安装说明](https://pnpm.io/installation)。通过 npm 安装 pnpm 12 需要 Node.js 22.13+；已安装的 pnpm 12 可以用于本项目的 Node.js 20+ 环境。
+
+`package-lock.json` 继续保留，npm 的安装、测试和构建命令仍可使用。修改依赖时同步维护两份锁文件：先用 npm 更新 `package-lock.json`，再执行 `pnpm import` 更新 pnpm 锁文件，最后验证 `pnpm install --frozen-lockfile`。
 
 浏览器验证默认使用本机 Edge 的独立无头配置，包含真实扩展的导入、配置、字体与图片、日志、应用/切换/恢复、交互及 Saurlax 页面检查。自动化仅在独立测试扩展副本添加 localhost/Saurlax 的 host 权限；正式 `dist/manifest.json` 仅声明 `activeTab/scripting/storage`，用户点击工具栏授予访问的流程仍需日常浏览器手测。
 

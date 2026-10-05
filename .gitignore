@@ -3,6 +3,7 @@
 
 # 新项目依赖与构建输出
 /node_modules/
+/.pnpm-store/
 /dist/
 /coverage/
 /.cache/
