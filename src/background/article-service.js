@@ -6,11 +6,14 @@ import { getBackground } from '../settings/background-repository.js';
 const locks = new Map();
 export function serialize(tabId, task) {
   const previous = locks.get(tabId) ?? Promise.resolve();
-  const next = previous.catch(() => {}).then(task);
-  locks.set(tabId, next);
+  const next = previous.catch(() => {}).then(task); //此处直接then收到错误会不启动，所以需要一个catch来过度错误
+  locks.set(tabId, next); //当前最新 Promise 保存下来 注意 task 此时还未启动
+  //执行清理逻辑 在这里比较的是两个 Promise 是否是同一个对象 不是同一个则删除
   next.finally(() => { if (locks.get(tabId) === next) locks.delete(tabId); }).catch(() => {});
   return next;
 }
+
+
 async function bootstrap(tabId) {
   const result = await chrome.scripting.executeScript({ target: { tabId }, files: ['content/controller.js'] });
   if (!result[0]?.documentId) throw new Error('无法取得当前页面文档。请刷新网页后再试。');
