@@ -1,3 +1,4 @@
+import { openBookmarks, bookmarkRequest, getBookmarkSettings, setBookmarkSettings, syncBookmarkStartup } from './bookmark-service.js';
 import { listThemes, importTheme, deleteTheme } from '../theme/repository.js';
 import { operate, serialize, cleanupDocument } from './article-service.js';
 import { getSettings, saveSettings } from '../settings/repository.js';
@@ -39,7 +40,12 @@ chrome.runtime.onMessage.addListener((request, sender, reply) => {
   let promise;
   if (request.type === 'article.cleanup' && sender.tab && sender.documentId) {
     promise = serialize(sender.tab.id, () => cleanupDocument(sender.tab.id, sender.documentId)).then(value => { scheduleAuto(sender.tab.id, sender.documentId); return value; });
+  } else if (['bookmark.list', 'bookmark.create', 'bookmark.update', 'bookmark.delete', 'bookmark.layout'].includes(request.type) && sender.tab) {
+    promise = bookmarkRequest(request, sender);
   } else if (!isUI) return;
+  else if (request.type === 'bookmark.settings.get') promise = getBookmarkSettings();
+  else if (request.type === 'bookmark.settings.set') promise = serialize('bookmark-settings', () => setBookmarkSettings(request.enabled));
+  else if (request.type === 'bookmark.open') promise = serialize(request.tabId, () => openBookmarks(request));
   else if (request.type === 'theme.list') promise = listThemes().then(items => items.map(({ source, ...theme }) => theme));
   else if (request.type === 'theme.import') promise = serialize('themes', () => importTheme(request.name, request.source, request.resources)).then(({ source, ...theme }) => theme);
   else if (request.type === 'theme.delete') promise = serialize('themes', () => deleteTheme(request.id));
@@ -59,6 +65,9 @@ chrome.runtime.onMessage.addListener((request, sender, reply) => {
     promise = serialize(request.tabId, async () => {
       if (request.type === 'article.restore') await pauseAuto(request.tabId);
       const value = await operate(request.tabId, request);
+      if (request.type === 'article.locate' && (await getBookmarkSettings()).enabled) {
+        await openBookmarks({ tabId: request.tabId, selector: request.selector ?? '' }).catch(() => {});
+      }
       if (request.type === 'article.apply') value.automation = await rememberManual(request.tabId, request, value);
       if (request.type === 'article.status') value.automation = await autoStatus(request.tabId);
       return value;
@@ -69,3 +78,9 @@ chrome.runtime.onMessage.addListener((request, sender, reply) => {
 });
 installAutoListeners();
 chrome.permissions.onAdded.addListener(() => installAutoListeners());
+
+serialize('bookmark-settings', syncBookmarkStartup).catch(() => {});
+chrome.permissions.onAdded.addListener(() => serialize('bookmark-settings', syncBookmarkStartup).catch(() => {}));
+chrome.permissions.onRemoved.addListener(() => serialize('bookmark-settings', async () => {
+  if (!(await getBookmarkSettings()).enabled) await setBookmarkSettings(false);
+}).catch(() => {}));

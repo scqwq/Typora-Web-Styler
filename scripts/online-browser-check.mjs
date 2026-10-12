@@ -52,7 +52,7 @@ try {
  const id=new URL(worker.url()).host;
  const ui=await context.newPage(); await ui.goto(`chrome-extension://${id}/options/index.html`); await ui.locator('#themes .theme').first().waitFor();
  const send=async(type,fields={})=>{const result=await ui.evaluate(data=>chrome.runtime.sendMessage(data),{type,...fields});assert.ok(result.ok,result.error);return result.value;};
- const fetchLink=async link=>{await ui.locator('#themeUrl').fill(link);await ui.locator('#fetchTheme').click();await ui.locator('#packageChoices').waitFor({state:'visible'});};
+ const fetchLink=async link=>{await ui.locator('#onlineForm').evaluate(form=>{form.closest('details').open=true;});await ui.locator('#themeUrl').fill(link);await ui.locator('#fetchTheme').click();await ui.locator('#packageChoices').waitFor({state:'visible'});};
  const importEntry=async(entry,name)=>{await ui.locator('#entrySelect').selectOption(entry);await ui.locator('#packageName').fill(name);await ui.locator('#importPackage').click();await ui.waitForFunction(name=>document.querySelector('#packageStatus').textContent.includes(`已导入“${name}”`),name);return(await send('theme.list')).find(t=>t.name===name);};
  await fetchLink('https://theme.typora.io/theme/Test/');
  assert.equal(await ui.evaluate(()=>window.remoteScriptExecuted),undefined);

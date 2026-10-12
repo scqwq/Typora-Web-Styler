@@ -13,7 +13,7 @@ for (const folder of ['popup', 'options', 'logs']) {
   });
 }
 await cp(path.join(root, 'src/manifest.json'), path.join(out, 'manifest.json'));
-for (const entry of ['background/index', 'content/controller', 'popup/index', 'options/index', 'logs/index']) {
+for (const entry of ['background/index', 'content/controller', 'content/bookmarks', 'popup/index', 'options/index', 'logs/index']) {
   await build({
     entryPoints: [path.join(root, `src/${entry}.js`)], outfile: path.join(out, `${entry}.js`),
     bundle: true, platform: 'browser', format: entry.startsWith('content/') ? 'iife' : 'esm',

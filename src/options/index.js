@@ -86,10 +86,10 @@ for (const group of policyGroups) {
   $('policyFields').append(fieldset);
 }
 async function savePolicy(settings) {
-  $('saveSettings').disabled = true; $('resetSettings').disabled = true;
-  try { const result = await send('settings.set', { settings }); showPolicy(result.settings); $('settingsStatus').textContent = '已保存。请返回网页再次应用主题。'; }
-  catch (error) { $('settingsStatus').textContent = error.message; }
-  finally { $('saveSettings').disabled = false; $('resetSettings').disabled = false; }
+  $('saveSettings').disabled = true; $('saveNodeSettings').disabled = true; $('resetSettings').disabled = true;
+  try { const result = await send('settings.set', { settings }); showPolicy(result.settings); $('settingsStatus').textContent = '已保存。请返回网页再次应用主题。'; $('nodeSettingsStatus').textContent = $('settingsStatus').textContent; }
+  catch (error) { $('settingsStatus').textContent = error.message; $('nodeSettingsStatus').textContent = error.message; }
+  finally { $('saveSettings').disabled = false; $('saveNodeSettings').disabled = false; $('resetSettings').disabled = false; }
 }
 $('settingsForm').addEventListener('submit', event => { event.preventDefault(); savePolicy({ ...Object.fromEntries(POLICY_FIELDS.map(([key]) => [key, $(key).checked])), maxArticleNodes: Number($('maxArticleNodes').value) }); });
 $('resetSettings').addEventListener('click', () => savePolicy(DEFAULT_POLICY));
@@ -297,3 +297,22 @@ $('importPackage').addEventListener('click', async () => {
   } catch (error) { $('packageStatus').textContent = error.message; await send('logs.importError', { message: error.message }).catch(() => {}); }
   finally { busy = false; onlineControls(false); }
 });
+
+$('bookmarksEnabled').addEventListener('change', async () => {
+  const enabled = $('bookmarksEnabled').checked;
+  // Request optional host permission in the checkbox click gesture.
+  const grant = enabled ? chrome.permissions.request({ origins: WEB_ORIGINS }) : Promise.resolve(true);
+  $('bookmarksEnabled').disabled = true;
+  try {
+    if (!await grant) throw new Error('未取得网站访问授权，页面标签未开启。');
+    const value = await send('bookmark.settings.set', { enabled });
+    $('bookmarksEnabled').checked = value.enabled;
+    $('bookmarkSettingsStatus').textContent = enabled ? '页面标签已开启；可识别正文的网页会自动启用。' : '页面标签已关闭，已保存的标签保留。';
+  } catch (error) {
+    $('bookmarkSettingsStatus').textContent = error.message;
+    try { $('bookmarksEnabled').checked = (await send('bookmark.settings.get')).enabled; } catch { $('bookmarksEnabled').checked = false; }
+  } finally { $('bookmarksEnabled').disabled = false; }
+});
+try { $('bookmarksEnabled').checked = (await send('bookmark.settings.get')).enabled; }
+catch (error) { $('bookmarkSettingsStatus').textContent = error.message; }
+finally { $('bookmarksEnabled').disabled = false; }

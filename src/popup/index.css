@@ -34,3 +34,6 @@ footer { display: flex; justify-content: space-between; align-items: center; bor
 .link:hover:not(:disabled) { background: transparent; color: #285d49; }
 :focus-visible { outline: 3px solid #81ae97; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+.bookmark-tools { margin-top: 12px; }
+#bookmarks { width: 100%; }

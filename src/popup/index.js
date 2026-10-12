@@ -8,7 +8,10 @@ let busy = false;
 let autoSettings = { enabled: false, sameSiteOnly: false };
 let targetUrl;
 function status(text, error = false) { $('status').textContent = text; $('status').className = error ? 'error' : ''; }
-function update() { $('apply').disabled = busy || !$('confirm').checked || confirmedSelector === null; }
+function update() {
+  const disabled = busy || !$('confirm').checked || confirmedSelector === null;
+  $('apply').disabled = disabled;
+}
 async function action(task) {
   if (busy) return;
   busy = true; for (const id of ['locate', 'restore', 'theme', 'selector']) $(id).disabled = true; update();

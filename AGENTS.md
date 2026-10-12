@@ -6,7 +6,7 @@
 
 用户最新指令优先。保护新旧项目已有修改。更新接手信息时修改 AEGNTS.md，避免重复维护完整指南。不要主动生成 HTML 解释页、可视化页面或 HTML 文档；只有用户明确要求时才生成，默认使用文字或 Markdown。
 
-当前版本为 0.4.0；快速开始见 [README.md](README.md)。主题转换、资源、统一配置、全局背景、标签页自动应用、日志的目录职责及验证边界均记录在 AEGNTS.md。构建入口为 `npm run build`，浏览器加载 `dist/`；不要运行旧项目的 Bash 打包脚本。
+当前版本为 0.5.0；快速开始见 [README.md](README.md)。主题转换、资源、统一配置、全局背景、标签页自动应用、日志的目录职责及验证边界均记录在 AEGNTS.md。构建入口为 `npm run build`，浏览器加载 `dist/`；不要运行旧项目的 Bash 打包脚本。
 
 接手 0.3.0 时注意：
 
@@ -25,3 +25,16 @@
 - 正文节点上限默认 60,000，可在设置页调整为 1–200,000；旧配置缺失时使用默认值。DeepSeek 自动识别仅针对 chat.deepseek.com 的 .ds-assistant-message-main-content，多条可用回答要求手动选择；弹窗提供容器查找说明。
 - 在线浏览器验证用 pnpm run test:browser:online，报告 artifacts/online-browser-results.json；DeepSeek 验证用 node scripts/deepseek-browser-check.mjs，报告 artifacts/deepseek-browser-results.json。当前 Node 测试共 36 项，已验证入口筛选、预检查、字体依赖和容量边界；真实 VLOOK 同版本 CSS 合并通过，不代表整包下载及所有视觉效果已验收。测试专用 host 权限和网络夹具不可进入正式包；真实来源下载情况见 AEGNTS.md。
 - 用户学习文件 导学.md 按 .gitignore 保留在本地。提交前检查无关用户修改，不将其混入功能提交；本地 commit 不代表获得推送授权。
+
+接手 0.5.0 页面标签：
+
+- 用户授权范围为选文记录、随文字显示图标、可拖动/收起侧栏、标签改名/改色/删除/跳转；自定义图标尚未实现。
+- src/bookmarks/repository.js 独立使用 local.pageBookmarksV1，所有读写串行；不要混入主题或 session.autoTabs。页面身份保留查询参数与 #/、#! 路由，普通 heading hash 共用。
+- content/bookmarks.js 独立于主题 controller，Shadow DOM UI 位于正文外。删除最后一个标签关闭侧栏但保留选文监听；设置页底部 bookmarkSettings 开关控制持久自动注入，刷新后自动恢复，关闭仅移除工具不删除数据。首次开启申请可选 HTTP/HTTPS host 权限；正文识别不明确时跳过，弹窗手动识别可启用。恢复主题不删除书签。
+- bookmark-service.js 只允许扩展 UI 打开工具，内容脚本 CRUD 仅限发送方主文档；必须核对当前 documentId/URL，不允许网页传任意 tab/url。
+- pnpm run test:browser:bookmarks 覆盖侧栏、内层滚动、选文恢复、持久化与原内容失效反馈；报告 artifacts/bookmark-browser-results.json。开关浏览器测试仅在副本预授予 HTTP/HTTPS host 权限，正式 manifest 不增加必需权限。
+
+交付 0.5.0 时注意：
+
+- 设置页主标题为“让阅读变成你熟悉的样子”；选文“标记”浮框在前次缩小后再整体缩至 80%，侧栏和正文图标不缩放。
+- 当前 Node 测试为 42 项。Release 上传根目录 typora-web-styler-0.5.0.zip：由正式 dist 内容打包，manifest.json 位于 ZIP 根目录。不要上传测试副本、缓存、artifacts 或私人导学文件。ZIP 按忽略规则保留本地，不纳入源码 commit。

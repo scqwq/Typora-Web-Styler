@@ -1,6 +1,6 @@
 # Typora Web Styler 项目指南与窗口接力记录
 
-版本：0.8 · 更新日期：2026-10-12 · 状态：Typora Web Styler 0.4.0；在线/ZIP 导入与包内 CSS 依赖已实现；统一配置、本地资源、全局背景、标签页自动应用、日志已实现。用户真实主题与复杂网站仍需逐项验收。
+版本：0.9 · 更新日期：2026-10-12 · 状态：Typora Web Styler 0.5.0；在线/ZIP 导入与包内 CSS 依赖已实现；统一配置、本地资源、全局背景、标签页自动应用、日志、页面阅读位置标签已实现。用户真实主题与复杂网站仍需逐项验收。
 
 ## 1. 指南入口与优先级
 
@@ -31,7 +31,7 @@
 - 项目目前位于 `D:\moresoftware\Web-markdown-theme`，原路径已不可用。本次只更新项目文档名称，不再次移动目录；定位源码以实际工作区为准，内层旧项目保持只读。
 - 用户已在自己的浏览器确认 Typora 主题可以正常导入；未提供该主题文件给 agent，不能将该反馈当成所有资源、结构或恢复均已验收。
 - 第一测试页面：`https://saurlax.com/blog/fundamentals-of-artificial-intelligence#人工智能概述`。本次通过独立无头 Edge 加载真实网页，确认正文为 `article#article-content`，有 4 个 pre 代码块、133 个公式候选及 13 个 SVG/图表候选。已为这个具体路径添加适配器，不推断所有 Saurlax 页面结构一致。
-- 当前 Node 行为测试共 36 项（含独立背景与自动应用配置/范围/权限检查）通过。独立无头 Edge 的原功能及全局背景回归通过；新增自动应用检查覆盖两个开关、标签页登记、刷新/SPA/延迟正文、范围限制、暂停恢复和后台重启，并验证 go-zero 刷新和环境安装章节点击。报告分别为 artifacts/browser-results.json 与 auto-browser-results.json；真实浏览器原生可选授权弹窗未自动化。
+- 当前 Node 行为测试共 42 项（含独立背景与自动应用配置/范围/权限检查）通过。独立无头 Edge 的原功能及全局背景回归通过；新增自动应用检查覆盖两个开关、标签页登记、刷新/SPA/延迟正文、范围限制、暂停恢复和后台重启，并验证 go-zero 刷新和环境安装章节点击。报告分别为 artifacts/browser-results.json 与 auto-browser-results.json；真实浏览器原生可选授权弹窗未自动化。
 - 目标站已用内置测试主题完成应用/撤销和前后截图检查；测试产物在 artifacts/，报告为 browser-results.json。后台/页面没有测试环境捕获的未处理错误。正式 activeTab 点击授权流程仍需要用户在日常 Edge/Chrome 中手动确认，Chrome 未单独实测。
 - 原回归仅在独立测试副本添加本地页/Saurlax host 权限；自动应用脚本在另一测试副本预授予 webNavigation 与 HTTP/HTTPS host 权限，实际修改仍由标签页登记决定。不要分发这些测试 manifest，或把预授予测试结果当成正式授权弹窗已验证。
 - 用户已在日常浏览器安装插件，并反馈内置主题“貌似成功”；这是用户初步试用反馈，不替代实际主题、所有交互与恢复的完整验收。用户没有看到正文高亮，需后续改进确认范围的体验。
@@ -109,6 +109,32 @@ popup 新增“如何查找正文容器”折叠说明：正文右键检查→�
 36 项 Node 测试、构建和 online-browser-check 通过；新增混合包夹具覆盖过滤、显示全部、字体/空/远程选项禁用、缺失/合并超限不写库、1.1MB CSS 保存、字体依赖仍加载，回归在线来源解析及设置页重开后离线字体/图片应用。截图 package-preflight.png 已检查，报告 online-browser-results.json 无捕获未处理错误。真实官方 V2026.10 CSS 和依赖通过 API 读取，未成功下载全 ZIP；Fancy 845217 字节、Thinking 1149766 字节、Note 735815 字节均通过预检查，约 0.7–0.9 秒（本机 Node 测量），fs-dyn-min 仍因无正文规则拒绝。报告 vlook-fix-results.json；主主题通过不等于视觉或专属插件功能兼容。
 
 用户全局偏好“不主动生成 HTML，除非明确要求”已写入本机 Codex 的 C:/Users/56955/.codex/AGENTS.md；当前及后续说明默认文字/Markdown。已更新 dist 与本地 0.4.0 ZIP。2026-10-12 用户随后要求更新 AGENTS.md 并提交一次本地 commit：本次提交在线导入、入口预检查、节点上限、DeepSeek 适配、测试与文档；不推送，不包含忽略的构建产物、私人导学文件、旧项目或 article-service.js 中用户已有的学习注释。
+
+### 3.8 页面阅读位置标签（0.5.0，2026-10-12）
+
+用户确认只完成 1～3：选词/短句后“记录”，图标跟随文字所在行；可拖动/收起侧栏，删除最后一个标签自动关闭；随机预设颜色、默认递增名称、改名/改色/删除/跳转。自定义图标及设置页导入是未来需求，本轮未实现。按用户偏好未生成 HTML 解释页。
+
+新增 src/shared/bookmark-policy.js（页面身份、字段校验、有界文本重定位）、src/bookmarks/repository.js（独立 local.pageBookmarksV1、串行读写、容量、递增名称、revision）、src/background/bookmark-service.js（固定文档注入与同文档 CRUD 校验）、src/content/bookmark-anchor.js（文本索引/选区/嵌套滚动）、bookmark-style.js（Shadow DOM 样式）、bookmarks.js（图标、选文按钮、侧栏、拖动、编辑、监听清理）。后台分发、popup、构建入口及 package 命令接入；不修改旧参考项目与用户 article-service.js 注释。
+
+不需要主题应用。当前入口为设置页底部“开启页面标签”持久开关，选文点击网页“标记”；旧弹窗入口已移除。UI 位于正文外，不改原 ID 或重建正文；同一页面多次开启保持单实例。图标按选中文字的首行位置布局，不写死行号或像素高度。检索按全文签名/原偏移、选文前后 64 字上下文恢复，重复匹配不明确或文字删除时提示未找到。正文选择器明确指向另一容器时不得误用其中的相同文字。
+
+普通标题 hash 共用同页标签；查询参数、#/ 与 #! 路由独立保存。主题切换/恢复保留标签；刷新/重开/浏览器重启后数据保留；开启设置开关后通过持久动态内容脚本自动启用，需可选 HTTP/HTTPS 网站授权，关闭后保留数据。同页多个已开启标签页通过 storage.onChanged 更新。页面路径变化释放 UI/事件/观察器；同页正文替换按已确认选择器重新定位。读写错误保留原存储并在网页提示。
+
+容量为每页 100、全局 1000 标签、200 页面记录（含删除后保留递增编号的空页面）；存储预算约 150 万 JSON 字符，文本检索上限 100 万字符/3 万文本节点。名称最长 80 字、选文最多 256 字、颜色限定六位十六进制。选文和摘要仅存本机，未加入普通日志。没有导出/导入或跨浏览器同步，卸载会清除数据；未来需自行增加备份能力。
+
+初版验证入口：新增 tests/bookmarks.test.js 和 scripts/bookmark-browser-check.mjs，命令 pnpm run test:browser:bookmarks。42 项 Node 测试通过；最终独立 Edge 的 17 项新增流程全部通过，包括跨内联节点选文、侧栏操作、字体变化/前文插入、正文替换、相同文字不同容器拒绝、输入控件排除、刷新、worker 重启和浏览器完整关闭重启。截图 bookmarks-sidebar.png、bookmarks-small-window.png 已检查；报告 bookmark-browser-results.json 无捕获错误。原本地主题/背景/配置回归通过；自动应用夹具与 go-zero 真实章节导航通过。Saurlax 真实页本轮连接关闭，不能报告通过。Chrome/联想浏览器和日常原生授权未实测。版本/README/构建包更新为 0.5.0，未提交或推送。
+
+### 3.9 设置页顺序与标签开关调整（2026-10-12）
+
+按用户要求将导入顺序改为本地 CSS/目录、本地 ZIP、链接；链接备注使用正确站点 theme.typora.io，说明整包可能含多个主题/配色，推荐下载查看后本地导入。两个标题分别改为“按照习惯微调部分”“主题沿用设置”。最大正文节点数移至页面底部，保留 settingsForm 关联与保存/重置行为，另有底部保存按钮和状态反馈。标签开关位于节点设置上方，弹窗不再显示开启按钮；选文按钮改为“标记”，文字/内边距/外框缩小至约原尺寸的 75%。
+
+bookmarkSettings.enabled 独立持久保存；首次点击开启申请可选 HTTP/HTTPS host 授权，后台注册持久 document_idle 内容脚本并启用已有可访问网页。关闭会撤销注册并清理当前工具，标签数据保留；授权拒绝回退关闭，权限撤销同步关闭。正文不明确时不选整页；每次 URL 变化最多 20 次、间隔 1.5 秒尝试，弹窗手动识别成功可开启所选容器。没有增加正式必需权限或主题自动应用登记。
+
+42 项现有 Node 测试和构建通过；标签独立 Edge 浏览器 18 项检查通过，覆盖布局顺序、底部节点保存、授权拒绝、自动启用、刷新/浏览器重启恢复、关闭清理与重新开启保留数据及原标签流程。在线/本地 ZIP 与目录导入浏览器回归也通过；检查最终设置页截图。测试仅在副本预授予 host，不代表原生授权弹窗已验收；报告 artifacts/bookmark-browser-results.json 和 online-browser-results.json。dist 与本地 0.5.0 ZIP 已同步。保留另一窗口所有标签代码与用户 article-service.js 注释，未提交或推送。
+
+### 3.10 标题与标记框微调、准备本地提交（2026-10-12）
+
+用户要求设置页主标题改为“让阅读变成你熟悉的样子”，选文“标记”浮框再缩至前次尺寸的 80%；使用整体 scale(.8)，不缩放侧栏和正文图标。更新 README 与 AGENTS 的分发说明：正式 dist 内容打包为根目录 typora-web-styler-0.5.0.zip，manifest 位于 ZIP 根目录。最终构建和标签浏览器 18 项检查通过，实际浮框宽度缩放比为 0.8，已检查按钮截图；重新打包并核对 ZIP 为 0.5.0、根目录含 manifest.json、没有测试 host_permissions。按用户要求将 0.5.0 标签功能、设置调整和文档提交一个本地 commit；不推送、不上传 Release，保留用户 article-service.js 学习注释在提交之外。
 
 ## 4. 用户新增想法与设计判断
 
@@ -235,6 +261,8 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 | src/background/index.js | 验证消息来源，分发 theme/article 请求，串行化主题写入与页面操作 | 新增扩展操作、检查请求参数和消息权限 |
 | src/background/article-service.js | 固定 tab/document 注入目标，调度编译，插入/删除 CSS，处理失败与后台重启遗留状态 | 查应用、切换、恢复和注入失败问题 |
 | src/background/auto-service.js、src/settings/auto-repository.js、src/shared/auto-policy.js | 临时标签页登记、范围/权限检查、导航重试、暂停恢复 | 查刷新或切页后自动应用、相同网站限制和授权问题 |
+| src/bookmarks/repository.js、src/shared/bookmark-policy.js | 页面标签持久化、容量/字段校验、页面身份与文字锚点匹配 | 查标签丢失、命名、页面混淆、文字匹配 |
+| src/content/bookmarks.js、bookmark-anchor.js、bookmark-style.js、src/background/bookmark-service.js | 页面标签 UI、正文内选文位置、滚动和受限消息注入 | 查选文记录、图标、拖动/编辑/删除/跳转和页面清理 |
 | src/content/detector.js | 验证用户选择器，站点规则优先，检查可见性/文字量/候选歧义 | 查“正文区域”、自动识别失败或误选范围 |
 | src/content/adapters/ | 仅存具体网站的已验证正文规则 | 新网站适配与实时 DOM 验证记录；当前只有 saurlax.js |
 | src/content/controller.js | 保存页面内选区和会话状态，调度标记/校验/撤销，预览高亮，观察正文替换和路径变化 | 查高亮、确认、会话阶段与 SPA 结束行为 |
