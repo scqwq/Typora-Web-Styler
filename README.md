@@ -10,6 +10,20 @@
 - 查看导入、转换、识别和应用日志，支持筛选与导出。
 - 选词记录阅读位置，支持可拖动侧栏、颜色与名称编辑、点击跳转和本地保存。
 
+### 效果展示：
+
+打开某个博客
+
+<img src="C:\Users\56955\AppData\Roaming\Typora\typora-user-images\image-20261012154355251.png" alt="image-20261012154355251" style="zoom:50%;" />
+
+更换主题之后
+
+<img src="C:\Users\56955\AppData\Roaming\Typora\typora-user-images\image-20261012154421895.png" alt="image-20261012154421895" style="zoom:50%;" />
+
+当前还可用于GPT、鲸鱼等网页端的聊天
+
+如果出现无法替换的情况，可以根据面板的指引查找**文字容器**
+
 ## 环境与快速开始
 
 当前版本 **0.5.0**。构建需要 **Node.js 20+、pnpm 12**（也支持 npm）；优先支持 Windows 上的 Chrome / Edge，其他浏览器需要另行验证，PowerShell 即可。
