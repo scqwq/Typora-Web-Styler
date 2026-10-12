@@ -1,4 +1,4 @@
-export const MAX_CSS_BYTES = 1024 * 1024;
+export const MAX_CSS_BYTES = 2 * 1024 * 1024;
 export const MAX_RESOURCE_BYTES = 16 * 1024 * 1024;
 export const MAX_BUNDLE_BYTES = 24 * 1024 * 1024;
 export const MAX_FILES = 64;

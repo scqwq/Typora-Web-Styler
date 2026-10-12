@@ -38,7 +38,7 @@ async function packageDirectory(name, owner) {
   }
 }
 for (const [name, owner] of [
-  ['postcss'], ['postcss-selector-parser'], ['postcss-value-parser'],
+  ['fflate'], ['postcss'], ['postcss-selector-parser'], ['postcss-value-parser'],
   ['nanoid', 'postcss'], ['picocolors', 'postcss'], ['source-map-js', 'postcss'],
   ['cssesc', 'postcss-selector-parser'], ['util-deprecate', 'postcss-selector-parser']
 ]) {

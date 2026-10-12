@@ -55,7 +55,7 @@ test('rem conversion uses a static theme html base without changing page html', 
   assert.ok(!css.includes('1.5rem'));
 });
 test('malformed, oversized and empty themes fail without yielding a partial stylesheet', () => {
-  for (const source of ['p {', '/* comment */', 'a'.repeat(1024 * 1024 + 1)]) assert.throws(() => compileTheme(source));
+  for (const source of ['p {', '/* comment */', 'a'.repeat(2 * 1024 * 1024 + 1)]) assert.throws(() => compileTheme(source));
   assert.throws(() => compileTheme('p { color: red }', { sessionId: 'x"] body' }));
 });
 test('numeric-leading session IDs remain quoted CSS attribute values', () => {

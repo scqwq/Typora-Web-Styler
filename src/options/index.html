@@ -3,24 +3,47 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler · 主题管理</title><link rel="stylesheet" href="index.css"></head>
 <body><main>
   <header>
-    <div class="brand-row"><span class="brand-mark" aria-hidden="true">TS</span><span class="eyebrow">Typora Web Styler</span><span class="version">v0.3.0</span></div>
+    <div class="brand-row"><span class="brand-mark" aria-hidden="true">TS</span><span class="eyebrow">Typora Web Styler</span><span class="version">v0.4.0</span></div>
     <div class="hero"><div><h1>让阅读，舒服一点。</h1><p>把喜欢的 Typora 排版带到网页里，留下文章原本的内容与交互。</p></div><nav aria-label="页面导航"><a href="#settings">调整样式</a><a href="../logs/index.html">查看日志 ↗</a></nav></div>
   </header>
   <div class="workspace">
     <section aria-labelledby="importTitle">
       <div class="section-heading"><h2 id="importTitle">带来一个喜欢的主题</h2><span class="step">01 · 导入</span></div>
-      <p class="intro">选好 CSS，剩下的交给我们。主题只保存在这台设备上。</p>
+      <p class="intro">导入本地文件，或粘贴喜欢的主题链接。下载后保存在这台设备上。</p>
+      <details class="resource-details" open><summary>从链接导入</summary>
+        <form id="onlineForm">
+          <label for="themeUrl">主题链接</label><input id="themeUrl" type="url" maxlength="2000" required placeholder="Typora 主题详情页、GitHub 仓库 / Release 或 ZIP 链接">
+          <p class="hint">仅支持 HTTPS。点击获取时按需申请下载来源访问权限；不会运行仓库脚本或自动更新主题。</p>
+          <button id="fetchTheme" type="submit">获取主题</button>
+        </form>
+        <div id="archiveChoices" hidden><label for="archiveSelect">选择发布包</label><select id="archiveSelect"></select><button id="downloadArchive" type="button">下载所选发布包</button></div>
+        <button id="grantDownload" type="button" hidden>授权并继续</button>
+        <p id="onlineStatus" role="status" aria-live="polite"></p>
+      </details>
+      <details class="resource-details"><summary>或导入本地 ZIP</summary><label for="zipFile">主题压缩包</label><input id="zipFile" type="file" accept=".zip,application/zip"><p class="hint">ZIP 最多 48 MB，解压后最多 96 MB。无需手动解压。</p></details>
+      <div id="packageChoices" hidden>
+        <p id="packageVersion" class="hint"></p>
+        <label class="policy"><input id="showAllCss" type="checkbox">显示全部 CSS（含依赖和示例）</label>
+        <label for="entrySelect">选择主题 CSS</label><select id="entrySelect"></select>
+        <p class="hint">亮色、暗色等分别导入。仅合并所选入口引用的包内 CSS；默认只显示主主题候选；字体依赖、在线入口和空文件不可单独导入。</p>
+        <label for="packageName">主题名称</label><input id="packageName" maxlength="100">
+        <button id="importPackage" type="button" disabled>导入所选主题</button>
+        <p id="packageStatus" role="status" aria-live="polite"></p>
+        <details><summary>检查详情与 CSS 依赖</summary><pre id="packageDetails" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
+      </div>
+      <details class="resource-details" open><summary>本地 CSS 与目录</summary>
       <form id="importForm">
         <label for="name">主题名称</label><input id="name" maxlength="100" placeholder="给它起个名字，或直接使用文件名">
-        <label for="file">主题 CSS</label><input id="file" type="file" accept=".css,text/css" required><p class="hint">最多 1 MB。导入后，会自动转换为正文可用的样式。</p>
+        <label for="file">主题 CSS</label><input id="file" type="file" accept=".css,text/css" required><p class="hint">最多 2 MB。导入后，会自动转换为正文可用的样式。</p>
         <details class="resource-details"><summary>还有配套的字体或图片？</summary>
           <label for="resources">添加资源文件</label><input id="resources" type="file" multiple accept=".woff,.woff2,.ttf,.otf,.png,.jpg,.jpeg,.webp,.gif">
           <label for="directory">或选择整个主题目录</label><input id="directory" type="file" webkitdirectory multiple>
-          <p class="hint">字体支持 WOFF / WOFF2 / TTF / OTF，图片支持 PNG / JPEG / WebP / GIF。最多 64 个资源，单个 16 MB、合计 24 MB。目录可保留相对路径，其他 CSS 不会自动合并；远程资源与 @import 暂不加载。</p>
+          <p class="hint">字体支持 WOFF / WOFF2 / TTF / OTF，图片支持 PNG / JPEG / WebP / GIF。最多 64 个资源，单个 16 MB、合计 24 MB。目录保留相对路径，并合并主 CSS 通过 @import 引用的包内 CSS；远程资源暂不加载。</p>
         </details>
         <button id="import" type="submit">导入这个主题</button>
       </form>
       <p id="status" role="status" aria-live="polite"></p>
+      </details>
     </section>
     <section aria-labelledby="themesTitle">
       <div class="section-heading"><h2 id="themesTitle">我的主题收藏</h2><span id="themeCount" class="count">本地收藏</span></div>
@@ -31,10 +54,14 @@
   <section id="settings" aria-labelledby="settingsTitle">
     <div class="section-heading"><h2 id="settingsTitle">按你的习惯，微调一下</h2><span class="step">02 · 配置</span></div>
     <p class="intro">所有主题共用这套设置。勾选要保留的原文样式，保存后回到网页再次应用主题。</p>
-    <form id="settingsForm"><div id="policyFields"></div><div class="actions"><button type="submit" id="saveSettings">保存我的偏好</button><button class="secondary" type="button" id="resetSettings">恢复默认</button></div></form>
+    <form id="settingsForm"><div id="policyFields"></div>
+      <label for="maxArticleNodes">最大正文节点数</label>
+      <input id="maxArticleNodes" type="number" min="1" max="200000" step="1" value="60000" required aria-describedby="maxArticleNodesHint">
+      <p id="maxArticleNodesHint" class="hint">默认 60,000，范围 1–200,000。统计正文容器及其内部元素；保存后再次应用主题生效。</p>
+      <div class="actions"><button type="submit" id="saveSettings">保存我的偏好</button><button class="secondary" type="button" id="resetSettings">恢复默认</button></div></form>
     <p id="settingsStatus" role="status" aria-live="polite"></p>
   </section>
-  <section class="notes"><h2>保留网页的熟悉感</h2><p>默认保留网站宽度、布局和代码配色，保护公式、图表与交互控件。背景图片默认关闭，可在上方开启；页面 CSP 可能影响资源加载。编辑器界面、动画与 @import 暂不支持，处理详情可在日志中查看。</p><p>如果正文没有被正确识别，可以在扩展小窗口中填写正文容器的 CSS 选择器。“恢复原样”随时可以撤回扩展样式。</p></section>
+  <section class="notes"><h2>保留网页的熟悉感</h2><p>默认保留网站宽度、布局和代码配色，保护公式、图表与交互控件。背景图片默认关闭，可在上方开启；页面 CSP 可能影响资源加载。编辑器界面、动画与远程 @import 暂不支持，处理详情可在日志中查看。</p><p>如果正文没有被正确识别，可以在扩展小窗口中填写正文容器的 CSS 选择器。“恢复原样”随时可以撤回扩展样式。</p></section>
   <section id="background" aria-labelledby="backgroundTitle">
     <div class="section-heading"><h2 id="backgroundTitle">给阅读换一张背景</h2><span class="step">03 · 全局背景</span></div>
     <p class="intro">所有主题共用你上传的图片，与主题配套资源独立。保存后，返回网页再次应用主题。</p>

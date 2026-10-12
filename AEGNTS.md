@@ -1,6 +1,6 @@
 # Typora Web Styler 项目指南与窗口接力记录
 
-版本：0.7 · 更新日期：2026-10-05 · 状态：Typora Web Styler 0.3.0；统一配置、本地资源、全局背景、标签页自动应用、日志已实现。用户真实主题与复杂网站仍需逐项验收。
+版本：0.8 · 更新日期：2026-10-12 · 状态：Typora Web Styler 0.4.0；在线/ZIP 导入与包内 CSS 依赖已实现；统一配置、本地资源、全局背景、标签页自动应用、日志已实现。用户真实主题与复杂网站仍需逐项验收。
 
 ## 1. 指南入口与优先级
 
@@ -31,16 +31,16 @@
 - 项目目前位于 `D:\moresoftware\Web-markdown-theme`，原路径已不可用。本次只更新项目文档名称，不再次移动目录；定位源码以实际工作区为准，内层旧项目保持只读。
 - 用户已在自己的浏览器确认 Typora 主题可以正常导入；未提供该主题文件给 agent，不能将该反馈当成所有资源、结构或恢复均已验收。
 - 第一测试页面：`https://saurlax.com/blog/fundamentals-of-artificial-intelligence#人工智能概述`。本次通过独立无头 Edge 加载真实网页，确认正文为 `article#article-content`，有 4 个 pre 代码块、133 个公式候选及 13 个 SVG/图表候选。已为这个具体路径添加适配器，不推断所有 Saurlax 页面结构一致。
-- 当前 Node 行为测试共 21 项（含独立背景与自动应用配置/范围/权限检查）通过。独立无头 Edge 的原功能及全局背景回归通过；新增自动应用检查覆盖两个开关、标签页登记、刷新/SPA/延迟正文、范围限制、暂停恢复和后台重启，并验证 go-zero 刷新和环境安装章节点击。报告分别为 artifacts/browser-results.json 与 auto-browser-results.json；真实浏览器原生可选授权弹窗未自动化。
+- 当前 Node 行为测试共 36 项（含独立背景与自动应用配置/范围/权限检查）通过。独立无头 Edge 的原功能及全局背景回归通过；新增自动应用检查覆盖两个开关、标签页登记、刷新/SPA/延迟正文、范围限制、暂停恢复和后台重启，并验证 go-zero 刷新和环境安装章节点击。报告分别为 artifacts/browser-results.json 与 auto-browser-results.json；真实浏览器原生可选授权弹窗未自动化。
 - 目标站已用内置测试主题完成应用/撤销和前后截图检查；测试产物在 artifacts/，报告为 browser-results.json。后台/页面没有测试环境捕获的未处理错误。正式 activeTab 点击授权流程仍需要用户在日常 Edge/Chrome 中手动确认，Chrome 未单独实测。
 - 原回归仅在独立测试副本添加本地页/Saurlax host 权限；自动应用脚本在另一测试副本预授予 webNavigation 与 HTTP/HTTPS host 权限，实际修改仍由标签页登记决定。不要分发这些测试 manifest，或把预授予测试结果当成正式授权弹窗已验证。
 - 用户已在日常浏览器安装插件，并反馈内置主题“貌似成功”；这是用户初步试用反馈，不替代实际主题、所有交互与恢复的完整验收。用户没有看到正文高亮，需后续改进确认范围的体验。
 - 旧项目的构建成功不代表新项目可构建、可加载或已完成浏览器验证。
-- 当前支持 1 MB 主 CSS、最多 64 个本地资源（单个 16 MB、合计 24 MB）、主题目录选择、字体隔离加载、背景图片、11 项统一配置、独立全局背景、临时标签页自动应用与持久日志。通用评分、网页点选、独立永久站点规则、@import 合并和 ZIP 资源包仍未实现。
+- 当前支持 2 MiB 主 CSS、最多 64 个本地资源（单个 16 MB、合计 24 MB）、主题目录选择、字体隔离加载、背景图片、11 项样式开关及可配置正文节点上限、独立全局背景、临时标签页自动应用与持久日志。在线/本地 ZIP 解包、包内 @import 合并已在 0.4 实现；通用评分、网页点选、独立永久站点规则仍未实现。
 
 ### 3.1 全局自定义背景（2026-10-05 新增）
 
-用户已授权第一版：在 options/index.html 中维护独立全局背景，上传用户图片，正文底色与图片不透明度分开调节，所有主题共用。设置默认关闭，正文底色 90%、图片 50%；PNG/JPEG/WebP/GIF 单张最多 16 MB，复用现有资源签名验证。使用 IndexedDB bundles 中保留 ID `global-background` 原子保存图片与配置，不混入布尔型 globalSettings。删除主题先检查主题存在，避免误删保留记录。
+用户已授权第一版：在 options/index.html 中维护独立全局背景，上传用户图片，正文底色与图片不透明度分开调节，所有主题共用。设置默认关闭，正文底色 90%、图片 50%；PNG/JPEG/WebP/GIF 单张最多 16 MB，复用现有资源签名验证。使用 IndexedDB bundles 中保留 ID `global-background` 原子保存图片与配置，不混入普通样式 globalSettings。删除主题先检查主题存在，避免误删保留记录。
 
 新增 src/shared/background-policy.js（数值配置契约）、src/settings/background-repository.js（保存与读取）、src/content/background.js（固定图片层、正文背景覆盖及 undo/redo）。后台增加 background.get/set；应用时读取配置，stage 预检图片，validate 在主题 CSS 注入后取得正文计算底色并应用透明度。图片固定居中 cover、不接收点击；body 使用可撤销 isolation，背景层 z-index -1。仅正文根改底色/去背景图，网站外层不透明容器保持原样，可能遮住图片；透明底色回退白色。
 
@@ -61,6 +61,54 @@
 设置页保存开启时申请可选 webNavigation；跨网站同时申请 HTTP/HTTPS host 权限；相同网站模式在网页小窗口点击应用时按需请求该网站 host。拒绝网站权限仍允许手动应用，自动能力可能只在 activeTab 临时授权有效时成立。后台无可选 API namespace 时不安装导航监听，授权后再安装，确保默认手动功能仍能启动。
 
 新增 scripts/auto-browser-check.mjs、tests/auto.test.js 和 pnpm run test:browser:auto。独立 Edge 已实测 go-zero 入门页通用规则选择 main（含标题正文，不含左右导航），刷新后自动应用，点击环境安装后自动重新应用；实际下一页为 /zh-cn/getting-started/installation/。这两页结果不代表全站验证。Native 可选授权弹窗仍需日常浏览器手测；拒绝场景仅在 UI API 边界模拟。
+
+### 3.3 在线主题与 ZIP 导入（0.4.0，2026-10-07）
+
+用户明确授权范围：保留本地导入；支持 Typora 详情页、GitHub 仓库/Release、HTTPS ZIP 直链；ZIP 解包、多个主题选择、包内 import 与配套资源；下载后离线使用，保留来源/版本；不做全站商店、任意网站解析、自动更新或在线构建。
+
+src/theme/online.js 按 URL 分类，Typora 用设置页 DOMParser 提取 Download，GitHub 用公开 API 列出 ZIP 附件；仓库没有合适发布包时取默认分支固定 commit 的 codeload 快照。显式 Release 不自动改版本。fetchBounded 用实际 host 权限检查、credentials omit、45 秒超时和流式大小限制。设置页同步从点击手势申请已知下载来源，发现额外域名时展示“授权并继续”；不向网页内容脚本开放下载接口，不登记自动应用标签页。
+
+src/theme/zip-package.js 用本地打包的 fflate 0.8.3 解包；先检查 central/local metadata、路径、重复项、压缩方式、符号链接和解压容量，解压后校验 CRC。最多下载 48 MiB、解压累计 96 MiB、2048 条目、128 CSS；拒绝 ZIP64/加密/链接，仅提取 CSS 与支持的字体/图片。列出入口，引用过的 CSS 和文档/示例目录标注“依赖/示例”，不声称自动识别全部主题。
+
+src/theme/css-package.js 用 PostCSS/value-parser 按依赖关系展开 import、保持顺序及重复引用语义；保留普通 @media 条件。修正每个 CSS 的 url 到包内统一路径，检测循环、缺失文件、越界、最大 16 层/256 引用，展开预算 8 MiB、最终 2 MiB。带 layer/supports 条件的 import 明确拒绝，远程 import 留给转换器跳过和报告。ZIP 仅将所选入口实际引用的本地资源送给原有签名/类型/容量校验，资源仍为最多 64 个、单个 16 MiB、合计 24 MiB。
+
+options 增加链接获取、发布附件选择、ZIP 本地输入、CSS 入口选择及导入；原有本地 CSS/目录仍可用，目录中的 import 也会合并。repository 保存合并后未经过滤的 CSS 与资源到 IndexedDB，元信息新增 provenance（去 query/hash 的来源/下载 URL、version、entry、downloadedAt）。应用时不再联网，现有转换/布局保护/字体隔离/恢复保持原样。
+
+验证：31 项 Node 测试；原 browser-check（含 Saurlax/全局背景）和 auto-browser-check（含 go-zero）通过；新增 online-browser-check.mjs 覆盖 Typora→Release→ZIP、多个附件/主题、commit 快照、ZIP 直链/本地包/目录依赖、失败不污染库、设置页重开后离线字体/图片应用/切换/恢复。在线测试使用可控 HTTPS 响应和独立 Edge 副本预授予权限；不等同于原生权限弹窗或所有真实来源都成功。
+
+真实来源只读探测：Drake 默认分支快照下载与 drake-ayu.css→drake/font.css 合并成功，4 个资源、310 条正文规则；两个内嵌 SVG 引用仍因现有不支持规则进入报告。Lapis 与 Phycat 本次下载超时，未将其标记为兼容成功。网络/主题站结构变化仍可能导致获取失败，可使用本地 ZIP 兜底。
+
+本轮更新源码/锁文件/说明/构建产物，不修改旧参考目录，不提交或推送。报告为 artifacts/online-browser-results.json，新增命令 pnpm run test:browser:online。必须只分发正式 dist，不分发测试副本。
+
+### 3.4 可配置正文节点上限（2026-10-08）
+
+统一配置新增 maxArticleNodes，默认 60,000，设置页提供“最大正文节点数”数字输入，允许 1–200,000 的整数。统计正文根及后代元素；保存后再次应用生效，恢复默认还原 60,000。旧版缺失配置和非法存储值回退默认值，修改其他偏好保留已保存的上限。超限错误显示实际配置并提示调整设置或缩小区域；失败切换继续保留旧主题。
+
+验证：34 项 Node 测试及构建通过；独立 Edge 原浏览器回归（含全局背景、Saurlax）通过，无捕获未处理错误。新增检查覆盖 60,000 元素成功、12,000 自定义上限拒绝与旧主题回退、65,000 保存/设置页重开/应用、恢复默认、60,001 拒绝和撤销清理。报告 artifacts/browser-results.json。浏览器确认框测试改为等待识别完成后检查默认勾选，避免与异步自动勾选竞争。已更新正式 dist 与本地 0.4.0 ZIP，未提交或推送。
+
+### 3.5 DeepSeek 分享页识别诊断（2026-10-09）
+
+只读调查用户提供的 https://chat.deepseek.com/share/s9ol46mf6vaapo7hsn。独立 Edge 已加载真实分享内容，语义候选 article/main/[role=main] 为 0，回答使用 div.ds-assistant-message-main-content，调查时尚无 DeepSeek 适配，因此当时默认 locate 返回“未找到正文”。该页 .ds-markdown 共 2 个（思考过程与最终回答），直接使用它会触发多匹配拒绝。最终回答匹配 1 个，750 字、含根 124 元素，与节点预算无关。
+
+独立正式构建测试副本实测：手动 .ds-assistant-message-main-content 定位成功，内置纸笺主题应用改变段落字体/颜色，恢复成功。只在测试副本授予 chat.deepseek.com host，不改正式 manifest、源码或 dist。证据 artifacts/deepseek-extension-diagnosis.json；当前结论仅覆盖此分享页，多轮登录聊天、流式输出和虚拟列表动态内容未验收。后续适配需明确单条回答与整个对话的范围，不能以选中整个 body 代替安全正文定位。
+
+### 3.6 DeepSeek 自动识别与容器查找帮助（2026-10-09）
+
+用户授权将已实测的 `.ds-assistant-message-main-content` 加入自动搜寻。新增 src/content/adapters/deepseek.js，只匹配 chat.deepseek.com，detector.js 优先使用该规则；适配候选保留全部匹配，再按原可见性/长度/范围检查筛选。单个可用回答自动定位，多条可用回答提示手动选择，目标不存在回退原 article/main/role=main；不自动取第一条、不扩展到整页 body。短于 80 字的正文门槛保持原样。
+
+popup 新增“如何查找正文容器”折叠说明：正文右键检查→沿父元素选完整正文→复制选择器→粘贴识别并确认范围。提示唯一匹配、加载时机、避免 body/html 和动态类名/位置失效；未找到/多候选错误指向该说明。README 同步操作步骤及已验证范围。
+
+34 项 Node 测试、构建通过。新增 scripts/deepseek-browser-check.mjs，命令 node scripts/deepseek-browser-check.mjs。真实分享页自动定位/内置主题应用/恢复通过；7 个浏览器夹具覆盖思考排除、隐藏回答、多回答拒绝、手动选单条、语义候选回退、其他域名相同类名不触发、普通 main 检测。弹窗帮助截图已检查，无捕获未处理错误；报告 artifacts/deepseek-browser-results.json。测试 host 仅在副本预授予，正式权限不变；已更新 dist 与本地 0.4.0 ZIP，未提交或推送。登录多轮聊天、流式/虚拟列表新增节点仍需另行验收。
+
+### 3.7 导入候选与预检查修复（2026-10-12）
+
+用户授权修复 VLOOK 候选过多、字体依赖误选与合并容量限制。zip-package.js 按 CSS 内容识别普通入口、字体-only、纯远程 import、空文件与语法问题；默认隐藏依赖/示例及非主题文件，“显示全部 CSS”仍可查看，非主题选项禁用。保留字体 CSS 和其他依赖用于合并，不按文件名盲删。
+
+新增 theme/package-analysis.js 的只读 inspectPackageTheme：所选入口 prepare→资源验证→同配置预编译，返回合并大小、依赖、资源及报告；失败禁用导入。options 用版本号取消过期预检查，缓存当前成功准备结果；展示实际来源版本及依赖详情。所有单 CSS/最终合并/后台/编译/ZIP 入口共享 2 MiB 上限，展开预算同步为 8 MiB；资源/ZIP/条目上限不变。README 已同步候选说明及 IndexedDB/storage 查看步骤。
+
+36 项 Node 测试、构建和 online-browser-check 通过；新增混合包夹具覆盖过滤、显示全部、字体/空/远程选项禁用、缺失/合并超限不写库、1.1MB CSS 保存、字体依赖仍加载，回归在线来源解析及设置页重开后离线字体/图片应用。截图 package-preflight.png 已检查，报告 online-browser-results.json 无捕获未处理错误。真实官方 V2026.10 CSS 和依赖通过 API 读取，未成功下载全 ZIP；Fancy 845217 字节、Thinking 1149766 字节、Note 735815 字节均通过预检查，约 0.7–0.9 秒（本机 Node 测量），fs-dyn-min 仍因无正文规则拒绝。报告 vlook-fix-results.json；主主题通过不等于视觉或专属插件功能兼容。
+
+用户全局偏好“不主动生成 HTML，除非明确要求”已写入本机 Codex 的 C:/Users/56955/.codex/AGENTS.md；当前及后续说明默认文字/Markdown。已更新 dist 与本地 0.4.0 ZIP。2026-10-12 用户随后要求更新 AGENTS.md 并提交一次本地 commit：本次提交在线导入、入口预检查、节点上限、DeepSeek 适配、测试与文档；不推送，不包含忽略的构建产物、私人导学文件、旧项目或 article-service.js 中用户已有的学习注释。
 
 ## 4. 用户新增想法与设计判断
 
@@ -88,7 +136,7 @@
 
 首版正文定位采用已实测站点规则和用户输入/确认的选择器；可检查 article/main 作为候选，但不盲目自动选最大容器。通用评分和网页点选工具后续增加。
 
-0.2 支持本地字体和可选的本地背景图片，可选择散文件或目录；远程资源与 @import 仍不加载，跳过并报告。目录中的其他 CSS 不会自动合并。字体通过二进制 FontFace 加入 document.fonts，图片使用验证后的 data URL；当前无头 Edge 扩展隔离环境在 font-src/img-src none 测试页仍加载成功，这是实际观察，不代表所有浏览器与资源来源均可绕过 CSP。日志按真实加载结果记录；损坏字体/图片会报告并回退。
+0.2 支持本地字体和可选的本地背景图片，可选择散文件或目录；0.4 新增在线/ZIP 导入与目录内 @import 合并，详见 3.3。远程资源和远程 import 不加载，跳过并报告；未被入口引用的 CSS 不会混合。字体通过二进制 FontFace 加入 document.fonts，图片使用验证后的 data URL；当前无头 Edge 扩展隔离环境在 font-src/img-src none 测试页仍加载成功，这是实际观察，不代表所有浏览器与资源来源均可绕过 CSP。日志按真实加载结果记录；损坏字体/图片会报告并回退。
 
 首版不做独立阅读覆盖层、不做 HTML 转 Markdown、不重新渲染公式或代码、不实现所有网站自动识别、不追求所有主题像素级复刻。
 
@@ -177,7 +225,7 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 
 推荐命令：`pnpm install --frozen-lockfile`、`pnpm test`、`pnpm run build`、`pnpm run test:browser`；npm 原有命令仍可用。packageManager 固定 pnpm 12.3.4，pnpm-workspace.yaml 使用 allowBuilds 允许 esbuild，并将 store 放在 .cache/pnpm/store；根项目独立，不包含旧参考目录。同时维护 package-lock.json 与 pnpm-lock.yaml，依赖更新后可从 npm 锁执行 pnpm import。构建按依赖 owner 解析间接依赖位置，不能再假定所有许可证都在根 node_modules 中。系统 npm 缓存本次不可写，已使用项目内 .cache/npm；默认沙箱进程初始化错误，改用获准的执行方式完成开发。不要修改系统 npm 配置或旧构建脚本。
 
-保护机制的当前限制：控件、公式、SVG/图表使用可撤销标记与继承样式快照保护；代码颜色改为统一配置的选定属性保护。网站会话期间的动态样式可能被保护盖住，不是完整动态隔离。新增复杂控件尚不自动补标记。保留属性捕获最多处理 12,000 个正文元素，超限需缩小范围。rem 采用静态基准，媒体查询中的动态 html 字号未完整适配。未知语法保守跳过。变量和字体名称按会话隔离。
+保护机制的当前限制：控件、公式、SVG/图表使用可撤销标记与继承样式快照保护；代码颜色改为统一配置的选定属性保护。网站会话期间的动态样式可能被保护盖住，不是完整动态隔离。新增复杂控件尚不自动补标记。正文元素上限由 globalSettings.maxArticleNodes 控制，默认 60,000；设置页可保存 1–200,000 的整数，含正文根元素，保存后再次应用生效。旧配置缺失或值非法时回退 60,000。交互/公式等保护边界的独立 1200 上限仍保留。rem 采用静态基准，媒体查询中的动态 html 字号未完整适配。未知语法保守跳过。变量和字体名称按会话隔离。
 
 ### 7.1 目录职责与查找入口（当前实际实现）
 
@@ -326,7 +374,7 @@ Typora Web Styler/            # 逻辑项目根，实际路径以工作区为准
 
 ### P1：日常使用
 
-0.3 已完成统一保留开关、本地资源/目录、日志、独立全局背景和临时标签页自动应用。后续完善通用检测和点选、独立永久站点规则、更复杂异步导航、动态新节点保护及 @import/ZIP 资源包。
+0.3 已完成统一保留开关、本地资源/目录、日志、独立全局背景和临时标签页自动应用。后续完善通用检测和点选、独立永久站点规则、更复杂异步导航、动态新节点保护。在线/ZIP 资源包与包内 import 已在 0.4 实现。
 
 ### P2：兼容性扩展
 

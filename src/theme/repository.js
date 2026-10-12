@@ -1,3 +1,4 @@
+import { mergeCss } from './css-package.js';
 import { compileTheme, MAX_THEME_BYTES } from './compiler.js';
 import { validateFiles, normalizePath } from './resources.js';
 import { putBundle, getBundle, deleteBundle } from './asset-store.js';
@@ -33,15 +34,18 @@ export async function getTheme(id) {
 }
 export async function importTheme(name, source, resources = {}) {
   if (typeof name !== 'string' || !name.trim()) throw new Error('请填写主题名称。');
-  if (typeof source !== 'string' || new TextEncoder().encode(source).length > MAX_THEME_BYTES) throw new Error('CSS 文件最多 1 MB。');
+  if (typeof source !== 'string' || new TextEncoder().encode(source).length > MAX_THEME_BYTES) throw new Error('CSS 文件最多 2 MB。');
   const validated = validateFiles(resources.files ?? []);
   const sourcePath = normalizePath(resources.sourcePath || 'theme.css');
   if (!sourcePath) throw new Error('无效 CSS 文件路径。');
-  const bundle = { source, sourcePath, files: validated.files };
-  const compiled = compileTheme(source, { bundle, settings: { enableFonts: true, enableBackgroundImages: true, useThemeBackground: true } });
+  if (resources.cssFiles != null && !Array.isArray(resources.cssFiles)) throw new Error('CSS 依赖清单格式不正确。');
+  const merged = resources.cssFiles ? mergeCss(sourcePath, [{ path: sourcePath, source }, ...resources.cssFiles.filter(file => file.path !== sourcePath)]) : { source, sourcePath };
+  const bundle = { source: merged.source, sourcePath: merged.sourcePath, files: validated.files };
+  const provenance = sanitizeProvenance(resources.provenance);
+  const compiled = compileTheme(bundle.source, { bundle, settings: { enableFonts: true, enableBackgroundImages: true, useThemeBackground: true } });
   const themes = (await listThemes()).filter(t => !t.builtIn);
   if (themes.length >= 20) throw new Error('首版最多保存 20 个自定义主题，请先删除不需要的主题。');
-  const theme = { id: crypto.randomUUID(), name: name.trim().slice(0, 100), report: compiled.report, resourceCount: validated.files.length, resourceBytes: validated.bytes, createdAt: Date.now() };
+  const theme = { id: crypto.randomUUID(), name: name.trim().slice(0, 100), report: compiled.report, resourceCount: validated.files.length, resourceBytes: validated.bytes, createdAt: Date.now(), ...(provenance ? { provenance } : {}) };
   await putBundle({ ...bundle, id: theme.id });
   try { await chrome.storage.local.set({ themes: [...themes, theme] }); }
   catch (error) { await deleteBundle(theme.id).catch(() => {}); throw error; }
@@ -53,4 +57,22 @@ export async function deleteTheme(id) {
   const themes = (await listThemes()).filter(t => !t.builtIn && t.id !== id);
   await chrome.storage.local.set({ themes });
   await deleteBundle(id);
+}
+
+function sanitizeProvenance(input) {
+  if (input == null) return undefined;
+  if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('来源信息格式不正确。');
+  const output = {};
+  for (const key of ['sourceUrl', 'downloadUrl']) {
+    if (typeof input[key] !== 'string' || input[key].length > 2000) throw new Error('来源链接格式不正确。');
+    const url = new URL(input[key]);
+    if (url.protocol !== 'https:' || url.username || url.password) throw new Error('来源必须是 HTTPS 链接。');
+    url.search = ''; url.hash = ''; output[key] = url.href;
+  }
+  for (const key of ['version', 'entry']) {
+    if (typeof input[key] !== 'string' || input[key].length > 1024) throw new Error('来源版本或入口格式不正确。');
+    output[key] = input[key].slice(0, key === 'version' ? 100 : 1024);
+  }
+  output.downloadedAt = Date.now();
+  return output;
 }

@@ -10,7 +10,7 @@ import { transformValue } from './transforms/values.js';
 export const COMPILER_VERSION = 2;
 export const MAX_THEME_BYTES = MAX_CSS_BYTES;
 export function compileTheme(source, { sessionId = 'preview', baseFontSize = 16, settings = {}, bundle = {} } = {}) {
-  if (typeof source !== 'string' || new TextEncoder().encode(source).length > MAX_THEME_BYTES) throw new Error('CSS 文件最多 1 MB（1,048,576 字节）。');
+  if (typeof source !== 'string' || new TextEncoder().encode(source).length > MAX_THEME_BYTES) throw new Error('CSS 文件最多 2 MB（2,097,152 字节）。');
   if (!/^[a-zA-Z0-9_-]{1,80}$/.test(sessionId)) throw new Error('无效的会话标记。');
   const reporting = createReport(baseFontSize);
   const { report, skip } = reporting;

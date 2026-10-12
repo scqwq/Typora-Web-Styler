@@ -37,3 +37,6 @@
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# 本地项目学习文档
+/导学.md

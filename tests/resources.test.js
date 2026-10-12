@@ -8,11 +8,11 @@ const png = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCA
 const font = 'data:font/woff;base64,' + Buffer.from('wOFF test fixture').toString('base64');
 const bundle = { sourcePath: 'css/theme.css', files: validateFiles([{ path: 'fonts/demo.woff', dataUrl: font }, { path: 'images/paper.png', dataUrl: png }]).files };
 
-test('CSS byte limit accepts exactly 1 MiB and rejects one byte more, including UTF-8', () => {
+test('CSS byte limit accepts exactly 2 MiB and rejects one byte more, including UTF-8', () => {
   const rule = '#write p{color:#333}'; const source = rule + '/*' + 'x'.repeat(MAX_THEME_BYTES - rule.length - 4) + '*/';
   assert.ok(compileTheme(source).css.includes('#333'));
-  assert.throws(() => compileTheme(source + 'x'), /1 MB/);
-  assert.throws(() => compileTheme('中'.repeat(Math.ceil(MAX_THEME_BYTES / 3))), /1 MB/);
+  assert.throws(() => compileTheme(source + 'x'), /2 MB/);
+  assert.throws(() => compileTheme('中'.repeat(Math.ceil(MAX_THEME_BYTES / 3))), /2 MB/);
 });
 test('local resource paths resolve relative to CSS, rejecting traversal and remote URLs', () => {
   assert.equal(normalizePath('../fonts/demo.woff', 'css/theme.css'), 'fonts/demo.woff');

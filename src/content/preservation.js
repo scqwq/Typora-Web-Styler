@@ -5,7 +5,7 @@ export function preserve(root, settings) {
   const policy = normalizePolicy(settings);
   const records = [];
   const nodes = [root, ...root.querySelectorAll('*')];
-  if (nodes.length > 12000) throw new Error('正文节点超过 12,000 个，请选择更小区域。');
+  if (nodes.length > policy.maxArticleNodes) throw new Error(`正文节点超过 ${policy.maxArticleNodes.toLocaleString('en-US')} 个，请在设置中增大最大正文节点数，或选择更小区域。`);
   for (const el of nodes) {
     if (el.closest('[data-wm-protected]')) continue;
     const heading = !!el.closest('h1,h2,h3,h4,h5,h6');

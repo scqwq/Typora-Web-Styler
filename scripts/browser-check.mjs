@@ -39,6 +39,43 @@ try {
     const response = await ui.evaluate(async data => chrome.runtime.sendMessage(data), { type, tabId, ...extra });
     assert.ok(response.ok, response.error); return response.value;
   };
+  // Large articles use the saved numeric budget; failed switches preserve the active theme.
+  assert.equal((await send('settings.get')).maxArticleNodes, 60000);
+  assert.equal(await ui.locator('#maxArticleNodes').inputValue(), '60000');
+  const largeArticle = await context.newPage(); await largeArticle.goto(address + '/large');
+  const largeTabId = await ui.evaluate(async url => (await chrome.tabs.query({})).find(tab => tab.url === url).id, address + '/large');
+  await largeArticle.evaluate(() => {
+    const root = document.querySelector('#post');
+    const fragment = document.createDocumentFragment();
+    const count = 60000 - 1 - root.querySelectorAll('*').length;
+    for (let i = 0; i < count; i++) fragment.append(document.createElement('span'));
+    root.append(fragment);
+  });
+  assert.equal(await largeArticle.locator('#post').evaluate(el => 1 + el.querySelectorAll('*').length), 60000);
+  const largeTarget = await send('article.locate', { tabId: largeTabId, selector: '#post' });
+  const largeFields = { tabId: largeTabId, selector: '#post', documentToken: largeTarget.documentToken, themeId: 'builtin-paper' };
+  await send('article.apply', largeFields);
+  const largeColor = await largeArticle.locator('#heading').evaluate(el => getComputedStyle(el).color);
+  await ui.locator('#maxArticleNodes').fill('12000'); await ui.locator('#saveSettings').click();
+  await ui.waitForFunction(async () => (await chrome.storage.local.get('globalSettings')).globalSettings.maxArticleNodes === 12000);
+  const limited = await ui.evaluate(data => chrome.runtime.sendMessage(data), { type: 'article.apply', ...largeFields });
+  assert.equal(limited.ok, false); assert.match(limited.error, /12,000/);
+  assert.equal(await largeArticle.locator('#heading').evaluate(el => getComputedStyle(el).color), largeColor);
+  assert.equal((await send('article.status', { tabId: largeTabId })).active, true);
+  await ui.locator('#maxArticleNodes').fill('65000'); await ui.locator('#saveSettings').click();
+  await ui.waitForFunction(async () => (await chrome.storage.local.get('globalSettings')).globalSettings.maxArticleNodes === 65000);
+  await ui.reload(); await ui.waitForFunction(() => document.querySelector('#maxArticleNodes').value === '65000');
+  await send('article.apply', largeFields);
+  await ui.locator('#resetSettings').click();
+  await ui.waitForFunction(async () => (await chrome.storage.local.get('globalSettings')).globalSettings.maxArticleNodes === 60000);
+  assert.equal(await ui.locator('#maxArticleNodes').inputValue(), '60000');
+  await largeArticle.locator('#post').evaluate(el => el.append(document.createElement('span')));
+  const overDefault = await ui.evaluate(data => chrome.runtime.sendMessage(data), { type: 'article.apply', ...largeFields });
+  assert.equal(overDefault.ok, false); assert.match(overDefault.error, /60,000/);
+  await send('article.restore', { tabId: largeTabId });
+  assert.equal(await largeArticle.locator('[data-wm-article], [data-wm-protected]').count(), 0);
+  await largeArticle.close();
+  results.nodeLimit = { passed: true, checks: ['60000 elements accepted', 'saved 12000 rejected with active theme restored', '65000 saved/reloaded/applied', 'reset to 60000', '60001 rejected', 'restore cleared markers'] };
   const snapshot = () => article.evaluate(() => {
     const css = selector => { const s = getComputedStyle(document.querySelector(selector)); return { color: s.color, font: s.fontFamily, size: s.fontSize, background: s.backgroundColor }; };
     return { heading: css('#heading'), nav: css('#outside'), copy: css('#copy'), token: css('.token'), formula: css('.katex'), width: document.querySelector('article').getBoundingClientRect().width };
@@ -89,7 +126,8 @@ try {
   await popup.locator('#theme option').first().waitFor({ state: 'attached' });
   await popup.locator('#selector').fill('#post');
   await popup.locator('#locate').click();
-  await popup.locator('#confirm').check();
+  await popup.waitForFunction(() => !document.querySelector('#locate').disabled && document.querySelector('#confirm').checked);
+  assert.equal(await popup.locator('#confirm').isChecked(), true);
   await popup.locator('#apply').click();
   await popup.waitForFunction(() => document.querySelector('#status').textContent.includes('主题已应用'));
   assert.notEqual((await snapshot()).heading.color, before.heading.color);

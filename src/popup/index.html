@@ -13,8 +13,17 @@
     <div class="actions"><button id="apply" disabled>应用主题</button><button id="restore" class="secondary">恢复原样</button></div>
   </div>
   <p id="status" role="status" aria-live="polite"></p>
+  <details id="selectorHelp"><summary>如何查找正文容器</summary>
+    <ol>
+      <li>在正文文字上右键，选择“检查”，打开开发者工具。</li>
+      <li>在“元素”面板向上选中父元素，直到网页高亮覆盖完整正文，同时避开导航、侧栏和输入框。</li>
+      <li>右键该元素，选择“复制 → 复制选择器（Copy selector）”。</li>
+      <li>把选择器粘贴到上方“正文在哪里？”输入框，再点击“识别正文”。确认范围后应用主题。</li>
+    </ol>
+    <p class="hint">选择器应只匹配一个容器。若匹配多个，选择更具体的父元素；若匹配 0 个，等待正文加载后重新复制。不要选择 body 或 html。带自动生成类名或位置编号的选择器，刷新后可能失效。</p>
+  </details>
   <details id="reportBox" hidden><summary>看看转换详情</summary><pre id="report"></pre></details>
   <p class="hint">保留网页的原有布局。字体、代码配色等细节，可以在设置里调整。</p>
 </main>
-<footer><button id="options" class="link">主题收藏 · 偏好 · 日志 ↗</button><span>v0.3.0</span></footer>
+<footer><button id="options" class="link">主题收藏 · 偏好 · 日志 ↗</button><span>v0.4.0</span></footer>
 <script type="module" src="index.js"></script></body></html>

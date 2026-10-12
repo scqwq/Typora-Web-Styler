@@ -1,8 +1,11 @@
+export const ARTICLE_NODE_LIMITS = Object.freeze({ min: 1, max: 200000, default: 60000 });
+
 export const DEFAULT_POLICY = Object.freeze({
   preserveHeadingSize: false, preserveHeadingColor: false,
   preserveBodyFont: false, preserveBodySize: false, preserveLineHeight: false,
   preserveLinkColor: false, preserveCodeColors: true, preserveCodeBackground: false,
-  enableFonts: true, enableBackgroundImages: false, useThemeBackground: false
+  enableFonts: true, enableBackgroundImages: false, useThemeBackground: false,
+  maxArticleNodes: ARTICLE_NODE_LIMITS.default
 });
 
 export const POLICY_FIELDS = [
@@ -17,7 +20,11 @@ export const POLICY_FIELDS = [
 export function normalizePolicy(input = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new Error('配置格式不正确。');
   for (const [key, value] of Object.entries(input)) {
-    if (!Object.hasOwn(DEFAULT_POLICY, key) || typeof value !== 'boolean') throw new Error(`无效配置项：${key}`);
+    if (key === 'maxArticleNodes') {
+      if (!Number.isInteger(value) || value < ARTICLE_NODE_LIMITS.min || value > ARTICLE_NODE_LIMITS.max) {
+        throw new Error('最大正文节点数必须是 1 到 200,000 之间的整数。');
+      }
+    } else if (!Object.hasOwn(DEFAULT_POLICY, key) || typeof value !== 'boolean') throw new Error(`无效配置项：${key}`);
   }
   return { ...DEFAULT_POLICY, ...input };
 }
