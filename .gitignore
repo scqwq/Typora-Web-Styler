@@ -40,3 +40,7 @@ Desktop.ini
 
 # 本地项目学习文档
 /导学.md
+
+# 本地工作指南；旧误拼名称也忽略，避免重复创建后被提交
+/AGENTS.md
+/AEGNTS.md

@@ -14,11 +14,11 @@
 
 打开某个博客
 
-<img src="C:\Users\56955\AppData\Roaming\Typora\typora-user-images\image-20261012154355251.png" alt="image-20261012154355251" style="zoom:50%;" />
+<img src=".\pic\image-20261012154355251.png" alt="image-20261012154355251" style="zoom:50%;" />
 
 更换主题之后
 
-<img src="C:\Users\56955\AppData\Roaming\Typora\typora-user-images\image-20261012154421895.png" alt="image-20261012154421895" style="zoom:50%;" />
+<img src=".\pic\image-20261012154421895.png" alt="image-20261012154421895" style="zoom:50%;" />
 
 当前还可用于GPT、鲸鱼等网页端的聊天
 
@@ -224,7 +224,7 @@ GitHub 仓库入口优先查最新正式 Release 的 ZIP 附件；没有合适�
 | `src/popup/`、`src/options/`、`src/logs/` | 扩展界面 |
 | `scripts/`、`tests/` | 构建和行为验证 |
 
-`markdown-viewer/` 是旧项目参考目录，保持独立，不参与新插件构建或 Git 提交。详细模块索引与设计决策见 [AEGNTS.md](AEGNTS.md)。
+`markdown-viewer/` 是旧项目参考目录，保持独立，不参与新插件构建或 Git 提交。详细模块索引与设计决策见本机 AGENTS.md（本地工作指南，不随仓库提交）。
 
 ## 开发、验证与接力
 
@@ -245,7 +245,7 @@ pnpm run test:browser:auto
 
 正式 `dist/manifest.json` 必需权限仍为 `activeTab/scripting/storage`；`webNavigation` 和 HTTP/HTTPS 网站访问均为可选，无默认持久 host 权限。正式 activeTab 点击与可选授权流程需要日常浏览器手测。自动测试报告分别是 `artifacts/browser-results.json` 和 `artifacts/auto-browser-results.json`，不得分发测试扩展副本。
 
-测试报告、截图和日志导出保存在 `artifacts/`，构建在 `dist/`，均不提交。不要直接修改生成文件代替源码修复。新的窗口先读 [AGENTS.md](AGENTS.md) 与 [AEGNTS.md](AEGNTS.md)，其中记录模块职责、旧项目复用参考、验证范围和后续计划。
+测试报告、截图和日志导出保存在 `artifacts/`，构建在 `dist/`，均不提交。不要直接修改生成文件代替源码修复。新的窗口先读本机 AGENTS.md，其中已合并模块职责、旧项目复用参考、验证范围和后续计划；该指南仅本地保留，不随仓库提交。
 
 ## Release 分发文件
 
