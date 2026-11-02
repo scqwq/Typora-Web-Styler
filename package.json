@@ -11,7 +11,8 @@
     "test:browser": "node scripts/browser-check.mjs",
     "test:browser:auto": "node scripts/auto-browser-check.mjs",
     "test:browser:online": "node scripts/online-browser-check.mjs",
-    "test:browser:bookmarks": "node scripts/bookmark-browser-check.mjs"
+    "test:browser:bookmarks": "node scripts/bookmark-browser-check.mjs",
+    "test:browser:ui": "node scripts/ui-browser-check.mjs"
   },
   "engines": {
     "node": ">=20"

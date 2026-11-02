@@ -1,110 +1,104 @@
 <!doctype html>
 <html lang="zh-CN">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler · 主题管理</title><link rel="stylesheet" href="index.css"></head>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler · 主题与设置</title><link rel="stylesheet" href="../shared/ui.css"><link rel="stylesheet" href="index.css"></head>
 <body><main>
   <header>
-    <div class="brand-row"><span class="brand-mark" aria-hidden="true">TS</span><span class="eyebrow">Typora Web Styler</span><span class="version">v0.5.0</span></div>
-    <div class="hero"><div><h1>让阅读变成你熟悉的样子</h1><p>把喜欢的 Typora 排版带到网页里，留下文章原本的内容与交互。</p></div><nav aria-label="页面导航"><a href="#settings">调整样式</a><a href="../logs/index.html">查看日志 ↗</a></nav></div>
+    <div class="brand-row"><span class="brand">Typora Web Styler</span><div class="appearance"><label for="appearance">外观</label><select id="appearance"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></div></div>
+    <p id="appearanceStatus" role="status" aria-live="polite"></p>
+    <div class="hero"><h1>让阅读变成你熟悉的样子</h1><nav aria-label="页面导航"><a href="#settings">样式设置</a><a href="../logs/index.html">日志</a></nav></div>
   </header>
   <div class="workspace">
     <section aria-labelledby="importTitle">
-      <div class="section-heading"><h2 id="importTitle">带来一个喜欢的主题</h2><span class="step">01 · 导入</span></div>
-      <p class="intro">导入本地文件，或粘贴喜欢的主题链接。下载后保存在这台设备上。</p>
+      <div class="section-heading"><h2 id="importTitle">导入主题</h2></div>
       <details class="resource-details" open><summary>本地 CSS 与目录</summary>
       <form id="importForm">
-        <label for="name">主题名称</label><input id="name" maxlength="100" placeholder="给它起个名字，或直接使用文件名">
-        <label for="file">主题 CSS</label><input id="file" type="file" accept=".css,text/css" required><p class="hint">最多 2 MB。导入后，会自动转换为正文可用的样式。</p>
-        <details class="resource-details"><summary>还有配套的字体或图片？</summary>
-          <label for="resources">添加资源文件</label><input id="resources" type="file" multiple accept=".woff,.woff2,.ttf,.otf,.png,.jpg,.jpeg,.webp,.gif">
-          <label for="directory">或选择整个主题目录</label><input id="directory" type="file" webkitdirectory multiple>
-          <p class="hint">字体支持 WOFF / WOFF2 / TTF / OTF，图片支持 PNG / JPEG / WebP / GIF。最多 64 个资源，单个 16 MB、合计 24 MB。目录保留相对路径，并合并主 CSS 通过 @import 引用的包内 CSS；远程资源暂不加载。</p>
+        <label for="name">主题名称</label><input id="name" maxlength="100" placeholder="默认使用文件名">
+        <label for="file">主题 CSS</label><input id="file" type="file" accept=".css,text/css" required><p class="hint">最多 2 MB。</p>
+        <details class="resource-details"><summary>配套字体、图片与目录</summary>
+          <label for="resources">资源文件</label><input id="resources" type="file" multiple accept=".woff,.woff2,.ttf,.otf,.png,.jpg,.jpeg,.webp,.gif">
+          <label for="directory">主题目录</label><input id="directory" type="file" webkitdirectory multiple>
+          <p class="hint">字体 WOFF / WOFF2 / TTF / OTF，图片 PNG / JPEG / WebP / GIF。最多 64 个资源，单个 16 MB、合计 24 MB。目录内的 CSS 依赖自动合并，远程资源不加载。</p>
         </details>
-        <button id="import" type="submit">导入这个主题</button>
+        <div class="actions"><button id="import" type="submit">导入主题</button></div>
       </form>
       <p id="status" role="status" aria-live="polite"></p>
       </details>
-      <details class="resource-details"><summary>导入本地 ZIP</summary><label for="zipFile">主题压缩包</label><input id="zipFile" type="file" accept=".zip,application/zip"><p class="hint">ZIP 最多 48 MB，解压后最多 96 MB。无需手动解压。</p></details>
+      <details class="resource-details"><summary>本地 ZIP</summary><label for="zipFile">主题压缩包</label><input id="zipFile" type="file" accept=".zip,application/zip"><p class="hint">最多 48 MB，解压后最多 96 MB。</p></details>
       <details class="resource-details"><summary>从链接导入</summary>
-        <p class="hint">可在 <a href="https://theme.typora.io/" target="_blank" rel="noopener noreferrer">theme.typora.io</a> 获取主题，将对应的主题页面或 GitHub 仓库主页链接粘贴到下方，插件会自动识别下载入口，选择主题后导入。不建议优先使用链接导入：部分下载包包含多个主题或配色版本，推荐自行下载、查看效果后使用本地导入。</p>
+        <p class="hint">支持 <a href="https://theme.typora.io/" target="_blank" rel="noopener noreferrer">theme.typora.io</a> 主题页、GitHub 仓库 / Release 和 HTTPS ZIP。整包可能含多个主题或配色，建议下载查看后本地导入。</p>
         <form id="onlineForm">
-          <label for="themeUrl">主题链接</label><input id="themeUrl" type="url" maxlength="2000" required placeholder="Typora 主题详情页、GitHub 仓库 / Release 或 ZIP 链接">
-          <p class="hint">仅支持 HTTPS。点击获取时按需申请下载来源访问权限；不会运行仓库脚本或自动更新主题。</p>
+          <label for="themeUrl">主题链接</label><input id="themeUrl" type="url" maxlength="2000" required placeholder="https://theme.typora.io/theme/…">
+          <p class="hint">获取时需授权下载来源，导入后可离线使用。</p>
           <button id="fetchTheme" type="submit">获取主题</button>
         </form>
-        <div id="archiveChoices" hidden><label for="archiveSelect">选择发布包</label><select id="archiveSelect"></select><button id="downloadArchive" type="button">下载所选发布包</button></div>
+        <div id="archiveChoices" hidden><label for="archiveSelect">发布包</label><select id="archiveSelect"></select><div class="actions"><button id="downloadArchive" type="button">下载所选包</button></div></div>
         <button id="grantDownload" type="button" hidden>授权并继续</button>
         <p id="onlineStatus" role="status" aria-live="polite"></p>
       </details>
-
       <div id="packageChoices" hidden>
         <p id="packageVersion" class="hint"></p>
         <label class="policy"><input id="showAllCss" type="checkbox">显示全部 CSS（含依赖和示例）</label>
-        <label for="entrySelect">选择主题 CSS</label><select id="entrySelect"></select>
-        <p class="hint">亮色、暗色等分别导入。仅合并所选入口引用的包内 CSS；默认只显示主主题候选；字体依赖、在线入口和空文件不可单独导入。</p>
+        <label for="entrySelect">主题 CSS</label><select id="entrySelect"></select>
+        <p class="hint">各配色分别导入，仅合并所选主题的包内依赖。字体、远程入口及空文件不可单独导入。</p>
         <label for="packageName">主题名称</label><input id="packageName" maxlength="100">
-        <button id="importPackage" type="button" disabled>导入所选主题</button>
+        <div class="actions"><button id="importPackage" type="button" disabled>导入所选主题</button></div>
         <p id="packageStatus" role="status" aria-live="polite"></p>
-        <details><summary>检查详情与 CSS 依赖</summary><pre id="packageDetails" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre></details>
+        <details><summary>检查详情与 CSS 依赖</summary><pre id="packageDetails"></pre></details>
       </div>
-
     </section>
     <section aria-labelledby="themesTitle">
-      <div class="section-heading"><h2 id="themesTitle">我的主题收藏</h2><span id="themeCount" class="count">本地收藏</span></div>
-      <p class="intro">打开文章后，在扩展小窗口里挑一个应用。</p>
+      <div class="section-heading"><h2 id="themesTitle">我的主题</h2><span id="themeCount" class="count"></span></div>
       <div id="themes"></div>
     </section>
   </div>
   <section id="settings" aria-labelledby="settingsTitle">
-    <div class="section-heading"><h2 id="settingsTitle">按照习惯微调部分</h2><span class="step">02 · 配置</span></div>
-    <p class="intro">所有主题共用这套设置。勾选要保留的原文样式，保存后回到网页再次应用主题。</p>
+    <div class="section-heading"><h2 id="settingsTitle">样式设置</h2></div>
+    <p class="intro">所有主题共用，保存后重新应用。下方“保留”项使用网页原有样式。</p>
     <form id="settingsForm"><div id="policyFields"></div>
-      <div class="actions"><button type="submit" id="saveSettings">保存我的偏好</button><button class="secondary" type="button" id="resetSettings">恢复默认</button></div></form>
+      <div class="actions"><button type="submit" id="saveSettings">保存设置</button><button class="secondary" type="button" id="resetSettings">恢复默认</button></div></form>
     <p id="settingsStatus" role="status" aria-live="polite"></p>
   </section>
-  <section class="notes"><h2>保留网页的熟悉感</h2><p>默认保留网站宽度、布局和代码配色，保护公式、图表与交互控件。背景图片默认关闭，可在上方开启；页面 CSP 可能影响资源加载。编辑器界面、动画与远程 @import 暂不支持，处理详情可在日志中查看。</p><p>如果正文没有被正确识别，可以在扩展小窗口中填写正文容器的 CSS 选择器。“恢复原样”随时可以撤回扩展样式。</p></section>
   <section id="background" aria-labelledby="backgroundTitle">
-    <div class="section-heading"><h2 id="backgroundTitle">给阅读换一张背景</h2><span class="step">03 · 全局背景</span></div>
-    <p class="intro">所有主题共用你上传的图片，与主题配套资源独立。保存后，返回网页再次应用主题。</p>
+    <div class="section-heading"><h2 id="backgroundTitle">阅读背景</h2></div>
+    <p class="intro">所有主题共用，保存后重新应用。</p>
     <form id="backgroundForm">
-      <label class="policy"><input id="backgroundEnabled" type="checkbox">启用我的背景图片</label>
-      <label for="backgroundFile">上传或替换图片</label><input id="backgroundFile" type="file" accept=".png,.jpg,.jpeg,.webp,.gif">
-      <p class="hint">PNG / JPEG / WebP / GIF，最多 16 MB。图片居中铺满窗口，保持比例；只保存在这台设备。</p>
-      <div id="backgroundPreview" class="background-preview"><div id="backgroundPreviewImage"></div><div id="backgroundPreviewSurface"><strong>一页，自己的风景。</strong><p>文字不随背景变透明。</p></div></div>
+      <label class="policy"><input id="backgroundEnabled" type="checkbox">启用背景图片</label>
+      <label for="backgroundFile">背景图片</label><input id="backgroundFile" type="file" accept=".png,.jpg,.jpeg,.webp,.gif">
+      <p class="hint">PNG / JPEG / WebP / GIF，最多 16 MB，仅保存到本机。</p>
+      <div id="backgroundPreview" class="background-preview"><div id="backgroundPreviewImage"></div><div id="backgroundPreviewSurface"><strong>正文预览</strong><p>调整底色与图片透明度，文字保持清晰。</p></div></div>
       <p id="backgroundName" class="hint">尚未上传图片</p>
       <label for="surfaceOpacity">正文底色不透明度 <output id="surfaceOpacityValue" for="surfaceOpacity">90%</output></label><input id="surfaceOpacity" type="range" min="0" max="100" value="90">
       <label for="imageOpacity">背景图片不透明度 <output id="imageOpacityValue" for="imageOpacity">50%</output></label><input id="imageOpacity" type="range" min="0" max="100" value="50">
-      <p class="hint">0% 为完全透明，100% 为完全不透明。正文底色优先于主题根背景，代码与引用保留各自底色。网站外层不透明容器可能遮住图片；预览仅示意透明度。</p>
-      <div class="actions"><button id="saveBackground" type="submit">保存背景配置</button><button id="removeBackground" class="secondary" type="button">删除图片并关闭</button></div>
+      <p class="hint">0% 透明，100% 不透明。预览仅示意；网站外层底色可能遮住图片。</p>
+      <div class="actions"><button id="saveBackground" type="submit">保存背景</button><button id="removeBackground" class="secondary" type="button">删除图片并关闭</button></div>
     </form>
     <p id="backgroundStatus" role="status" aria-live="polite"></p>
   </section>
   <section id="automation" aria-labelledby="automationTitle">
-    <div class="section-heading"><h2 id="automationTitle">主题沿用设置</h2><span class="step">04 · 自动应用</span></div>
-    <p class="intro">这里只设置偏好。在网页小窗口中成功应用一次主题后，才会记住那个标签页及所选主题。</p>
+    <div class="section-heading"><h2 id="automationTitle">主题沿用设置</h2></div>
+    <p class="intro">在扩展面板手动应用一次后，该标签页刷新或切页时会自动应用。</p>
     <form id="automationForm">
       <label class="policy"><input id="autoEnabled" type="checkbox">当前标签页自动使用主题</label>
-      <p class="hint">已登记的标签页刷新、切换章节时自动识别正文。其他标签页不受影响；分别手动应用后可各自登记。</p>
       <label class="policy"><input id="sameSiteOnly" type="checkbox" disabled>仅限该标签页下的相同网站</label>
-      <p class="hint">勾选后只跟随最初登记的网站；不勾选则可跟随该标签页跨网站导航，需要额外的网站访问授权。</p>
-      <p class="hint">关闭标签页、重启浏览器或重新加载扩展后，临时登记会清除。“恢复原样”会暂停该标签页自动应用，再次手动应用后恢复。识别不明确的页面会跳过。</p>
-      <div class="actions"><button id="saveAuto" type="submit">保存自动应用偏好</button></div>
+      <p class="hint">不勾选时可跨网站沿用，需额外授权。关闭标签页、重启浏览器或重载扩展会清除登记；“恢复原样”暂停沿用，手动应用后恢复。</p>
+      <div class="actions"><button id="saveAuto" type="submit">保存沿用设置</button></div>
     </form>
     <p id="autoStatus" role="status" aria-live="polite"></p>
   </section>
   <section id="bookmarkSettings" aria-labelledby="bookmarkSettingsTitle">
-    <div class="section-heading"><h2 id="bookmarkSettingsTitle">页面标签设置</h2></div>
+    <div class="section-heading"><h2 id="bookmarkSettingsTitle">页面标签</h2></div>
     <label class="policy"><input id="bookmarksEnabled" type="checkbox" disabled>开启页面标签</label>
-    <p class="hint">开启后自动在可识别正文的网页启用，选取词或短句后点击“标记”。首次开启需授权网站访问；关闭工具保留已保存的标签。自动识别失败时，可在扩展小窗口填写正文选择器并点击“识别正文”。</p>
+    <p class="hint">选中文字后点击“标记”。首次开启需授权网站访问，关闭不删除标签。未识别正文时，可在扩展面板填写选择器并重新识别。</p>
     <p id="bookmarkSettingsStatus" role="status" aria-live="polite"></p>
   </section>
   <section id="nodeSettings" aria-labelledby="nodeSettingsTitle">
-    <div class="section-heading"><h2 id="nodeSettingsTitle">最大正文节点数</h2></div>
-      <label for="maxArticleNodes">最大正文节点数</label>
-      <input id="maxArticleNodes" form="settingsForm" type="number" min="1" max="200000" step="1" value="60000" required aria-describedby="maxArticleNodesHint">
-      <p id="maxArticleNodesHint" class="hint">默认 60,000，范围 1–200,000。统计正文容器及其内部元素；保存后再次应用主题生效。</p>
-    <button id="saveNodeSettings" type="submit" form="settingsForm">保存最大正文节点数</button>
+    <div class="section-heading"><h2 id="nodeSettingsTitle">正文处理上限</h2></div>
+    <label for="maxArticleNodes">最大正文节点数</label>
+    <input id="maxArticleNodes" form="settingsForm" type="number" min="1" max="200000" step="1" value="60000" required aria-describedby="maxArticleNodesHint">
+    <p id="maxArticleNodesHint" class="hint">默认 60,000，范围 1–200,000。含正文容器及内部元素，保存后重新应用。</p>
+    <button id="saveNodeSettings" type="submit" form="settingsForm">保存上限</button>
     <p id="nodeSettingsStatus" role="status" aria-live="polite"></p>
   </section>
-  <footer class="page-footer">选一个喜欢的主题，安心读完下一篇。</footer>
+  <footer class="page-footer">Typora Web Styler · v0.5.0</footer>
 </main><script type="module" src="index.js"></script></body>
 </html>

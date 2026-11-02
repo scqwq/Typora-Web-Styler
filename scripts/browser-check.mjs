@@ -129,11 +129,11 @@ try {
   await popup.waitForFunction(() => !document.querySelector('#locate').disabled && document.querySelector('#confirm').checked);
   assert.equal(await popup.locator('#confirm').isChecked(), true);
   await popup.locator('#apply').click();
-  await popup.waitForFunction(() => document.querySelector('#status').textContent.includes('主题已应用'));
+  await popup.waitForFunction(() => document.querySelector('#status').textContent.includes('已应用主题'));
   assert.notEqual((await snapshot()).heading.color, before.heading.color);
   await popup.locator('body').screenshot({ path: path.join(artifacts, 'popup.png') });
   await popup.locator('#restore').click();
-  await popup.waitForFunction(() => document.querySelector('#status').textContent.includes('已撤销'));
+  await popup.waitForFunction(() => document.querySelector('#status').textContent.includes('已恢复原样'));
   assert.deepEqual(await snapshot(), before);
   // Preferences capture the original page, even while switching an already active theme.
   const original = await article.evaluate(() => {

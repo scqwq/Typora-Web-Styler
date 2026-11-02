@@ -1,29 +1,32 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler</title><link rel="stylesheet" href="index.css"></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler</title><link rel="stylesheet" href="../shared/ui.css"><link rel="stylesheet" href="index.css"></head>
 <body>
-<header><span class="badge" aria-hidden="true">TS</span><div><h1>Typora Web Styler</h1><p>换个喜欢的排版，慢慢读。</p></div></header>
+<header><h1>Typora Web Styler</h1></header>
 <main>
   <div class="panel">
-    <label for="theme">这次，想用哪个主题？</label><select id="theme"></select>
-    <label for="selector">正文在哪里？<span>可以留空，让我们先试着识别。</span></label>
-    <input id="selector" placeholder="例如 article 或 .post-content" autocomplete="off">
+    <label for="theme">主题</label><select id="theme"></select>
+    <label for="selector">正文区域<span>留空自动识别</span></label>
+    <input id="selector" placeholder="article 或 .post-content" autocomplete="off">
     <button id="locate" class="secondary">识别正文</button>
-    <div id="target" class="target">识别后，先看一眼正文范围。</div>
+    <div id="target" class="target">尚未识别正文</div>
     <label class="check"><input id="confirm" type="checkbox" disabled>使用已识别的正文区域</label>
     <div class="actions"><button id="apply" disabled>应用主题</button><button id="restore" class="secondary">恢复原样</button></div>
   </div>
   <p id="status" role="status" aria-live="polite"></p>
   <details id="selectorHelp"><summary>如何查找正文容器</summary>
     <ol>
-      <li>在正文文字上右键，选择“检查”，打开开发者工具。</li>
-      <li>在“元素”面板向上选中父元素，直到网页高亮覆盖完整正文，同时避开导航、侧栏和输入框。</li>
-      <li>右键该元素，选择“复制 → 复制选择器（Copy selector）”。</li>
-      <li>把选择器粘贴到上方“正文在哪里？”输入框，再点击“识别正文”。确认范围后应用主题。</li>
+      <li>在正文上右键，选择“检查”。</li>
+      <li>在“元素”面板向上选择父元素，直到高亮覆盖正文，避开导航、侧栏和输入框。</li>
+      <li>右键该元素，选择“复制 → 复制选择器”。</li>
+      <li>粘贴到“正文区域”，点击“识别正文”并确认范围。</li>
     </ol>
-    <p class="hint">选择器应只匹配一个容器。若匹配多个，选择更具体的父元素；若匹配 0 个，等待正文加载后重新复制。不要选择 body 或 html。带自动生成类名或位置编号的选择器，刷新后可能失效。</p>
+    <p class="hint">选择器须唯一匹配，勿用 body 或 html。匹配不到时请等待正文加载；动态类名或位置编号可能在刷新后失效。</p>
   </details>
-  <details id="reportBox" hidden><summary>看看转换详情</summary><pre id="report"></pre></details>
-  <p class="hint">保留网页的原有布局。字体、代码配色等细节，可以在设置里调整。</p>
+  <details id="reportBox" hidden><summary>转换详情</summary><pre id="report"></pre></details>
 </main>
-<footer><button id="options" class="link">主题收藏 · 偏好 · 日志 ↗</button><span>v0.5.0</span></footer>
+<footer>
+  <button id="options" class="link">主题与设置</button>
+  <div class="appearance"><label for="appearance">外观</label><select id="appearance"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></div>
+</footer>
+<p id="appearanceStatus" role="status" aria-live="polite"></p>
 <script type="module" src="index.js"></script></body></html>

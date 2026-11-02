@@ -1,3 +1,4 @@
+import '../shared/appearance.js';
 import { inspectPackageTheme } from '../theme/package-analysis.js';
 import { unpackZip, listPackageThemes, MAX_ZIP_BYTES } from '../theme/zip-package.js';
 import { resolveLink, originsForLink, fetchBounded, NeededPermission, sourceAddress } from '../theme/online.js';
@@ -57,7 +58,7 @@ $('importForm').addEventListener('submit', async event => {
     const cssFiles = await Promise.all(otherCss.map(async item => ({ path: relativePath(item), source: await item.text() })));
     requested = true;
     const theme = await send('theme.import', { name: $('name').value.trim() || file.name.replace(/\.css$/i, ''), source, resources: { files, ...(cssFiles.length ? { cssFiles } : {}), sourcePath: cssMatches.length ? relativePath(cssMatches[0]) : file.name } });
-    $('status').className = ''; $('status').textContent = `已导入“${theme.name}”。\n${reportText(theme.report)}`;
+    $('status').className = ''; $('status').textContent = `已导入“${theme.name}”。`;
     $('importForm').reset(); await render();
   } catch (error) { $('status').className = 'error'; $('status').textContent = error.message; if (!requested) await send('logs.importError', { message: error.message }).catch(() => {}); }
   finally { busy = false; $('import').disabled = false; }
@@ -68,15 +69,14 @@ function showPolicy(settings) {
   $('maxArticleNodes').value = settings.maxArticleNodes;
 }
 const policyGroups = [
-  { title: '正文排版', description: '勾选后，保留网页原本的对应样式。', keys: ['preserveHeadingSize', 'preserveHeadingColor', 'preserveBodyFont', 'preserveBodySize', 'preserveLineHeight', 'preserveLinkColor'] },
-  { title: '代码阅读', description: '照顾原有高亮，也可以试试主题的配色。', keys: ['preserveCodeColors', 'preserveCodeBackground'] },
-  { title: '字体与背景', description: '按需启用主题的配套资源。', keys: ['enableFonts', 'enableBackgroundImages', 'useThemeBackground'] }
+  { title: '正文排版', keys: ['preserveHeadingSize', 'preserveHeadingColor', 'preserveBodyFont', 'preserveBodySize', 'preserveLineHeight', 'preserveLinkColor'] },
+  { title: '代码', keys: ['preserveCodeColors', 'preserveCodeBackground'] },
+  { title: '字体与背景', keys: ['enableFonts', 'enableBackgroundImages', 'useThemeBackground'] }
 ];
 for (const group of policyGroups) {
   const fieldset = document.createElement('fieldset'); fieldset.className = 'policy-group';
   const legend = document.createElement('legend'); legend.textContent = group.title;
-  const description = document.createElement('p'); description.textContent = group.description;
-  fieldset.append(legend, description);
+  fieldset.append(legend);
   for (const key of group.keys) {
     const text = POLICY_FIELDS.find(([field]) => field === key)[1];
     const label = document.createElement('label'); label.className = 'policy';

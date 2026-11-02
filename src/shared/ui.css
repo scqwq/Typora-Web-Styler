@@ -1,0 +1,82 @@
+/* Dark palette adapted from Clay Academy 0.1.10 by scqwq (MIT).
+   User reference: anthropic-clay/v0.1.10/clay-academy.json. */
+:root {
+  color-scheme: light;
+  --bg: #f7f9fc;
+  --paper: #fbfdff;
+  --ink: #263849;
+  --muted: #586c7c;
+  --line: #bdcfdc;
+  --line-soft: #d8e3eb;
+  --fill: #edf3f7;
+  --accent: #315f7a;
+  --accent-hover: #254b63;
+  --accent-ink: #ffffff;
+  --error: #a13f38;
+  --error-bg: #f8eae7;
+  --radius: 10px;
+  font: 14px/1.6 "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+:root[data-appearance="dark"] {
+  color-scheme: dark;
+  --bg: #1e1e1b;
+  --paper: #262622;
+  --ink: #f0efec;
+  --muted: #c1bcb1;
+  --line: #49473f;
+  --line-soft: #393831;
+  --fill: #302f29;
+  --accent: #e7a080;
+  --accent-hover: #f0b393;
+  --accent-ink: #262622;
+  --error: #e8a39a;
+  --error-bg: #432d2b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-appearance="light"]) {
+    color-scheme: dark;
+    --bg: #1e1e1b;
+    --paper: #262622;
+    --ink: #f0efec;
+    --muted: #c1bcb1;
+    --line: #49473f;
+    --line-soft: #393831;
+    --fill: #302f29;
+    --accent: #e7a080;
+    --accent-hover: #f0b393;
+    --accent-ink: #262622;
+    --error: #e8a39a;
+    --error-bg: #432d2b;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+[hidden] { display: none !important; }
+a { color: var(--accent); text-underline-offset: 3px; }
+button, input, select { font: inherit; }
+button, input, select, summary, a { -webkit-tap-highlight-color: transparent; }
+button { padding: 8px 16px; border: 1px solid transparent; border-radius: 6px; background: var(--accent); color: var(--accent-ink); font-weight: 600; cursor: pointer; }
+button:hover:not(:disabled) { background: var(--accent-hover); }
+button:disabled { opacity: .45; cursor: default; }
+.secondary { background: var(--fill); color: var(--ink); border-color: var(--line); }
+.secondary:hover:not(:disabled) { background: var(--line-soft); }
+input:not([type=file]):not([type=checkbox]):not([type=range]), select {
+  width: 100%; min-width: 0; border: 1px solid var(--line); border-radius: 6px;
+  padding: 9px 10px; background: var(--paper); color: var(--ink);
+}
+input::placeholder { color: var(--muted); opacity: 1; }
+input[type=checkbox], input[type=range] { accent-color: var(--accent); }
+input[type=checkbox] { width: 16px; height: 16px; flex-shrink: 0; margin: 3px 0 0; }
+.appearance { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.appearance label { margin: 0; font-weight: 400; white-space: nowrap; }
+.appearance select { width: auto; padding: 5px 24px 5px 8px; font-size: 12px; }
+.hint { font-size: 12px; color: var(--muted); line-height: 1.7; }
+summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+summary:hover { color: var(--accent); }
+pre { background: var(--fill); border-radius: 6px; padding: 12px; font: 12px/1.7 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 240px; overflow: auto; }
+[role=status] { color: var(--accent); font-size: 12px; white-space: pre-wrap; overflow-wrap: anywhere; }
+[role=status]:empty { display: none; }
+[role=status].error, .error { color: var(--error); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }

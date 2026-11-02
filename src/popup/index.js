@@ -1,3 +1,4 @@
+import '../shared/appearance.js';
 import { send, reportText } from '../shared/messages.js';
 import { hostPattern } from '../shared/auto-policy.js';
 const $ = id => document.getElementById(id);
@@ -28,7 +29,7 @@ $('locate').addEventListener('click', () => action(async () => {
   documentToken = found.documentToken; confirmedSelector = selector;
   const d = found.description;
   $('target').textContent = `${d.title}\n${d.element}${d.id ? `#${d.id}` : ''} · ${d.characters} 字 · ${d.headings} 个标题 · ${d.codeBlocks} 个代码块`;
-  $('confirm').disabled = false; $('confirm').checked = true; status('已识别正文，可直接应用；需要时可取消勾选。');
+  $('confirm').disabled = false; $('confirm').checked = true; status('已识别正文。');
 }));
 $('apply').addEventListener('click', () => action(async () => {
   let permissionNotice = '';
@@ -42,10 +43,10 @@ $('apply').addEventListener('click', () => action(async () => {
   const result = await send('article.apply', { tabId, documentToken, selector: confirmedSelector, themeId: $('theme').value });
   await chrome.storage.local.set({ preferredTheme: $('theme').value });
   $('reportBox').hidden = false; $('report').textContent = `${reportText(result.report)}\n已加载 ${result.resources.fontLoaded} 个字体；保留 ${result.preservedCount} 项原站样式。\n${result.resources.failures.join('\n')}`;
-  status(`主题已应用。已保护 ${result.protectedCount} 个控件、公式或图表区域。${result.resources.failures.length ? '部分资源未加载，详见报告和日志。' : ''}${result.automation?.registered ? '已记住此标签页，刷新或切页后会自动应用。' : result.automation?.notice ?? ''}${permissionNotice}`);
+  status(`已应用主题。${result.resources.failures.length ? '部分资源未加载，见转换详情。' : ''}${result.automation?.registered ? '此标签页将自动沿用。' : result.automation?.notice ?? ''}${permissionNotice}`);
 }));
 $('restore').addEventListener('click', () => action(async () => {
-  await send('article.restore', { tabId }); $('reportBox').hidden = true; status('已撤销主题，并暂停此标签页自动应用。再次手动应用可恢复。');
+  await send('article.restore', { tabId }); $('reportBox').hidden = true; status('已恢复原样，自动沿用已暂停。');
 }));
 await action(async () => {
   const [tabs, themes, preferences, automatic] = await Promise.all([chrome.tabs.query({ active: true, currentWindow: true }), send('theme.list'), chrome.storage.local.get('preferredTheme'), send('auto.get')]);
@@ -56,6 +57,6 @@ await action(async () => {
   try {
     const current = await send('article.status', { tabId });
     if (current.themeId && themes.some(t => t.id === current.themeId)) $('theme').value = current.themeId;
-    status(current.notice || (current.active ? '当前正文已有主题，可重新识别后切换，或直接恢复。' : current.automation?.paused ? '此标签页自动应用已暂停，手动应用一次可恢复。' : '选择主题，然后识别正文。'));
-  } catch { status('在博客文章标签页打开此弹窗，再识别正文。'); }
+    status(current.notice || (current.active ? '已应用主题。重新识别可切换主题。' : current.automation?.paused ? '自动沿用已暂停，手动应用后恢复。' : ''));
+  } catch { status('请在文章网页中打开扩展面板。'); }
 });

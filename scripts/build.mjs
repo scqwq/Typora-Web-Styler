@@ -7,6 +7,8 @@ import { createRequire } from 'node:module';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const out = path.join(root, 'dist');
 await mkdir(out, { recursive: true });
+await mkdir(path.join(out, 'shared'), { recursive: true });
+await cp(path.join(root, 'src/shared/ui.css'), path.join(out, 'shared/ui.css'));
 for (const folder of ['popup', 'options', 'logs']) {
   await cp(path.join(root, 'src', folder), path.join(out, folder), {
     recursive: true, filter: file => !file.endsWith('.js')
