@@ -12,12 +12,14 @@ const before = process.argv.includes('--before');
 const extension = path.join(artifacts, before ? 'before-extension' : 'after-extension');
 await cp(path.join(root, 'dist'), extension, { recursive: true });
 const manifest = JSON.parse(await readFile(path.join(extension, 'manifest.json'), 'utf8'));
+const packageInfo = JSON.parse(await readFile(path.join(root, 'package.json'), 'utf8'));
+assert.equal(manifest.version, packageInfo.version, 'built manifest matches package version');
 manifest.host_permissions = ['http://127.0.0.1/*']; // Dedicated test copy only.
 await writeFile(path.join(extension, 'manifest.json'), JSON.stringify(manifest));
 const fixture = await readFile(path.join(root, 'tests/fixtures/article.html'));
 const server = createServer((req, res) => { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(fixture); });
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-const report = { checks: [], errors: [], appearance: [] };
+const report = { version: manifest.version, checks: [], errors: [], appearance: [] };
 // Browser action popups are separate targets, not ordinary tabs with a preset viewport.
 async function nativePopup(worker, ui, mode) {
   const cdp = await ui.context().newCDPSession(ui);
@@ -73,6 +75,7 @@ try {
   const ui = await context.newPage();
   await ui.goto(`chrome-extension://${id}/options/index.html`);
   await ui.locator('#themes .theme').first().waitFor();
+  assert.equal(await ui.locator('.page-footer').innerText(), `Typora Web Styler · v${manifest.version}`);
   const article = await context.newPage();
   await article.goto(`http://127.0.0.1:${server.address().port}/`);
   const tabId = await worker.evaluate(async url => (await chrome.tabs.query({})).find(tab => tab.url === url).id, article.url());

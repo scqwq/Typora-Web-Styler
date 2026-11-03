@@ -66,8 +66,8 @@ try {
   const popup = await context.newPage(); await popup.goto(`chrome-extension://${id}/popup/index.html`);
   assert.equal(await popup.locator('#bookmarks').count(), 0); await popup.close();
   assert.deepEqual(await ui.locator('section[aria-labelledby="importTitle"] > details > summary').allTextContents(), ['本地 CSS 与目录', '本地 ZIP', '从链接导入']);
-  assert.equal(await ui.locator('h1').innerText(), '让阅读变成你熟悉的样子');
-  assert.equal(await ui.locator('#settingsTitle').innerText(), '样式设置');
+  assert.equal(await ui.locator('h1').innerText(), 'Typora Web Styler');
+  assert.equal(await ui.locator('#settingsTitle').innerText(), '共用样式设置');
   assert.equal(await ui.locator('#automationTitle').innerText(), '主题沿用设置');
   assert.ok(await ui.evaluate(() => !!(document.querySelector('#bookmarkSettings').compareDocumentPosition(document.querySelector('#nodeSettings')) & Node.DOCUMENT_POSITION_FOLLOWING)));
   await ui.locator('#maxArticleNodes').fill('65000'); await ui.locator('#saveNodeSettings').click();

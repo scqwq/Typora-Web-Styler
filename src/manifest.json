@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Typora Web Styler",
-  "version": "0.5.0",
+  "version": "0.6.2",
   "description": "将 Typora CSS 主题应用到当前网页正文，支持主题导入、切换、恢复与阅读位置标签。",
   "permissions": [
     "activeTab",

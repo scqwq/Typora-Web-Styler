@@ -3,9 +3,9 @@
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Typora Web Styler · 主题与设置</title><link rel="stylesheet" href="../shared/ui.css"><link rel="stylesheet" href="index.css"></head>
 <body><main>
   <header>
-    <div class="brand-row"><span class="brand">Typora Web Styler</span><div class="appearance"><label for="appearance">外观</label><select id="appearance"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></div></div>
+    <div class="brand-row"><h1>Typora Web Styler</h1><div class="appearance"><label for="appearance">外观</label><select id="appearance"><option value="system">跟随系统</option><option value="light">浅色</option><option value="dark">深色</option></select></div></div>
     <p id="appearanceStatus" role="status" aria-live="polite"></p>
-    <div class="hero"><h1>让阅读变成你熟悉的样子</h1><nav aria-label="页面导航"><a href="#settings">样式设置</a><a href="../logs/index.html">日志</a></nav></div>
+    <div class="hero"><nav aria-label="页面导航"><a href="#settings">共用样式设置</a><a href="../logs/index.html">日志</a></nav></div>
   </header>
   <div class="workspace">
     <section aria-labelledby="importTitle">
@@ -52,15 +52,13 @@
     </section>
   </div>
   <section id="settings" aria-labelledby="settingsTitle">
-    <div class="section-heading"><h2 id="settingsTitle">样式设置</h2></div>
-    <p class="intro">所有主题共用，保存后重新应用。下方“保留”项使用网页原有样式。</p>
+    <div class="section-heading"><h2 id="settingsTitle">共用样式设置</h2></div>
     <form id="settingsForm"><div id="policyFields"></div>
       <div class="actions"><button type="submit" id="saveSettings">保存设置</button><button class="secondary" type="button" id="resetSettings">恢复默认</button></div></form>
     <p id="settingsStatus" role="status" aria-live="polite"></p>
   </section>
   <section id="background" aria-labelledby="backgroundTitle">
     <div class="section-heading"><h2 id="backgroundTitle">阅读背景</h2></div>
-    <p class="intro">所有主题共用，保存后重新应用。</p>
     <form id="backgroundForm">
       <label class="policy"><input id="backgroundEnabled" type="checkbox">启用背景图片</label>
       <label for="backgroundFile">背景图片</label><input id="backgroundFile" type="file" accept=".png,.jpg,.jpeg,.webp,.gif">
@@ -69,36 +67,33 @@
       <p id="backgroundName" class="hint">尚未上传图片</p>
       <label for="surfaceOpacity">正文底色不透明度 <output id="surfaceOpacityValue" for="surfaceOpacity">90%</output></label><input id="surfaceOpacity" type="range" min="0" max="100" value="90">
       <label for="imageOpacity">背景图片不透明度 <output id="imageOpacityValue" for="imageOpacity">50%</output></label><input id="imageOpacity" type="range" min="0" max="100" value="50">
-      <p class="hint">0% 透明，100% 不透明。预览仅示意；网站外层底色可能遮住图片。</p>
       <div class="actions"><button id="saveBackground" type="submit">保存背景</button><button id="removeBackground" class="secondary" type="button">删除图片并关闭</button></div>
     </form>
     <p id="backgroundStatus" role="status" aria-live="polite"></p>
   </section>
   <section id="automation" aria-labelledby="automationTitle">
     <div class="section-heading"><h2 id="automationTitle">主题沿用设置</h2></div>
-    <p class="intro">在扩展面板手动应用一次后，该标签页刷新或切页时会自动应用。</p>
     <form id="automationForm">
       <label class="policy"><input id="autoEnabled" type="checkbox">当前标签页自动使用主题</label>
       <label class="policy"><input id="sameSiteOnly" type="checkbox" disabled>仅限该标签页下的相同网站</label>
-      <p class="hint">不勾选时可跨网站沿用，需额外授权。关闭标签页、重启浏览器或重载扩展会清除登记；“恢复原样”暂停沿用，手动应用后恢复。</p>
       <div class="actions"><button id="saveAuto" type="submit">保存沿用设置</button></div>
     </form>
     <p id="autoStatus" role="status" aria-live="polite"></p>
   </section>
   <section id="bookmarkSettings" aria-labelledby="bookmarkSettingsTitle">
-    <div class="section-heading"><h2 id="bookmarkSettingsTitle">页面标签</h2></div>
+    <div class="section-heading"><h2 id="bookmarkSettingsTitle">标签功能</h2></div>
     <label class="policy"><input id="bookmarksEnabled" type="checkbox" disabled>开启页面标签</label>
-    <p class="hint">选中文字后点击“标记”。首次开启需授权网站访问，关闭不删除标签。未识别正文时，可在扩展面板填写选择器并重新识别。</p>
+    <p class="hint">选中文字后点击“标记”。首次开启可能需授权网站访问</p>
     <p id="bookmarkSettingsStatus" role="status" aria-live="polite"></p>
   </section>
   <section id="nodeSettings" aria-labelledby="nodeSettingsTitle">
     <div class="section-heading"><h2 id="nodeSettingsTitle">正文处理上限</h2></div>
     <label for="maxArticleNodes">最大正文节点数</label>
     <input id="maxArticleNodes" form="settingsForm" type="number" min="1" max="200000" step="1" value="60000" required aria-describedby="maxArticleNodesHint">
-    <p id="maxArticleNodesHint" class="hint">默认 60,000，范围 1–200,000。含正文容器及内部元素，保存后重新应用。</p>
+    <p id="maxArticleNodesHint" class="hint">最大为200000</p>
     <button id="saveNodeSettings" type="submit" form="settingsForm">保存上限</button>
     <p id="nodeSettingsStatus" role="status" aria-live="polite"></p>
   </section>
-  <footer class="page-footer">Typora Web Styler · v0.5.0</footer>
+  <footer class="page-footer">Typora Web Styler · v0.6.2</footer>
 </main><script type="module" src="index.js"></script></body>
 </html>
